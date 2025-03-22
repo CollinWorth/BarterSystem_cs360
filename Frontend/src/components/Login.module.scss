@@ -1,0 +1,51 @@
+//src/components/Login.module.scss
+
+.loginContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f2f2f2;
+}
+
+.loginForm {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    width: 300px;
+
+    h2{
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    input{
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+
+
+        &:focus{
+            outline: none;
+            border-color: #007bff;
+        }
+    }
+
+    button{
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+
+        &:hover{
+            background-color: #0056b3;
+        }
+    }
+}
