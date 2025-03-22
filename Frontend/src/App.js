@@ -1,25 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
 
-function App() {
+// Import pages
+import PostsPage from "./pages/Posts";
+import LoginPage from "./pages/Login";
+import SignUpPage from "./pages/Signup";
+
+const App = () => {
+  const [currentPage, setCurrentPage] = useState("home"); // Start at "home"
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page); // Change the page when button is clicked
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app-container">
+      {/* Top Navigation Bar */}
+      <div className="top-bar">
+        <div className="logo">HaggleHub</div>
+        <div className="nav-buttons">
+          <button onClick={() => handlePageChange("posts")}>Posts</button>
+          <button onClick={() => handlePageChange("login")}>Login</button>
+          <button onClick={() => handlePageChange("signup")}>Sign Up</button>
+        </div>
+      </div>
+
+      {/* Main Container */}
+      <div className="container">
+        {/* Conditional Rendering of Pages */}
+        {currentPage === "posts" && <PostsPage />}
+        {currentPage === "login" && <LoginPage />}
+        {currentPage === "signup" && <SignUpPage />}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
