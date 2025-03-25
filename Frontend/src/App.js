@@ -17,7 +17,7 @@ const App = () => {
     <div className="app-container">
       {/* Top Navigation Bar */}
       <div className="top-bar">
-        <div className="logo">HaggleHub</div>
+        <div className="logo" onClick ={() => handlePageChange("home")}>HaggleHub</div>
         <div className="nav-buttons">
           <button onClick={() => handlePageChange("posts")}>Posts</button>
           <button onClick={() => handlePageChange("login")}>Login</button>
@@ -26,12 +26,18 @@ const App = () => {
       </div>
 
       {/* Main Container */}
-      <div className="container">
+      <div className={
+        currentPage === "posts" ? "container posts-container" : 
+        currentPage === "login" ? "container login-container" : 
+        currentPage === "signup" ? "container signup-container" : 
+        "container"
+        }>
         {/* Conditional Rendering of Pages */}
         {currentPage === "posts" && <PostsPage />}
         {currentPage === "login" && <LoginPage />}
         {currentPage === "signup" && <SignUpPage />}
       </div>
+      
     </div>
   );
 };

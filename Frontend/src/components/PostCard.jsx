@@ -1,11 +1,14 @@
-import React from "react";
+import React from 'react';
+import styles from './PostCard.module.scss';
 
 const PostCard = ({ post, onHaggleClick }) => {
   return (
-    <div className="post-card">
-      <h3>{post.title}</h3>
-      <p>{post.body}</p>
-      <button onClick={() => onHaggleClick(post)}>Haggle</button>
+    <div className={styles['post-card-container']}> {/* Applying the more specific container */}
+      <div className={styles['post-card']}>
+        <h3>{post.title}</h3>
+        <p>{post.body}</p>
+        <button onClick={() => onHaggleClick(post)}>Haggle</button>
+      </div>
     </div>
   );
 };

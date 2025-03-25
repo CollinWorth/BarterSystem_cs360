@@ -13,8 +13,8 @@ const HagglePopup = ({ post, onClose }) => {
   };
 
   return (
-    <div className="popup">
-      <div className="popup-content">
+    <div className="modal-overlay">
+      <div className="modal-content">
         <h2>Haggle for {post.title}</h2>
         <p>{post.body}</p>
 

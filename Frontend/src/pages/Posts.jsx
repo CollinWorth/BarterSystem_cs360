@@ -27,7 +27,13 @@ const Posts = () => {
         <PostCard key={post.id} post={post} onHaggleClick={handleHaggleClick} />
       ))}
 
-      {selectedPost && <HagglePopup post={selectedPost} onClose={closePopup} />}
+    {selectedPost && (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <HagglePopup post={selectedPost} onClose={closePopup} />
+        </div>
+      </div>
+    )}
     </div>
   );
 };
