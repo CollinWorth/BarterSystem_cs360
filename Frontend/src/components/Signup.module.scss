@@ -1,18 +1,18 @@
 //src/components/Login.module.scss
 
-.loginContainer{
+.signupContainer{
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
 }
 
-.loginForm {
+.signupForm {
     background: #fffefe8b;
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    width: 300px;
+    width: 80%;
     align-items: center;
 
     h2{

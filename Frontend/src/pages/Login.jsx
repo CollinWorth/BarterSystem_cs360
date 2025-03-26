@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
+
 import components from '../components/Login.module.scss'
+
 
 const Login = () => {
   const [form, setForm] = useState({username: '', password: ''});
@@ -29,8 +31,7 @@ const Login = () => {
            placeholder="Password"
            value={form.password}
            onChange={handleChange}/>
-         <button type='submit'>Login</button>
-         <button type='signup'>Sign Up</button>
+         <button type='login'>Login</button>
       </form>
     </div>
    );
