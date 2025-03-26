@@ -1,5 +1,11 @@
 from pydantic import BaseModel
 
+class Listing(BaseModel):
+	name: str
+	description: str
+	photo: str
+	quantity: int
+	user: str
 class Todo(BaseModel):
 	nanoid: str
 	title: str
