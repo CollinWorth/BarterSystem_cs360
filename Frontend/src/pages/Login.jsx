@@ -1,19 +1,24 @@
 import React, {useState} from 'react';
+import {useAuth} from '../context/AuthContext';
 
-import components from '../components/Login.module.scss'
+import components from '../components/Login.module.scss';
 
 
-const Login = () => {
-  const [form, setForm] = useState({username: '', password: ''});
+const Login = ({ onLoginSuccess }) => {
+  const [username, setUsername] = useState('');
+  const { login } = useAuth();
 
-  const handleChange = (e) => {
-    setForm({...form, [e.target.name]: e.target.value});
-  };
+  //const handleChange = (e) => {
+  //  setForm({...form, [e.target.name]: e.target.value});
+  //};
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    login(username);
     //TODO Create the API to handle login logic
-    console.log('Logging in ',form);
+    console.log('Logging in ');
+    onLoginSuccess("userdash");
+
   };
    return(
     <div className={components.loginContainer}>
@@ -23,15 +28,16 @@ const Login = () => {
         type="text"
         name="username"
         placeholder="Username"
-        value={form.username}
-        onChange={handleChange}/>
+        //value={form.username}
+        onChange={(e) => setUsername(e.target.value)}/>
         <input
            type="password"
            name="password"
            placeholder="Password"
-           value={form.password}
-           onChange={handleChange}/>
-         <button type='login'>Login</button>
+           //value={form.password}
+           //onChange={handleChange}
+           />
+         <button type='submit'>Login</button>
       </form>
     </div>
    );

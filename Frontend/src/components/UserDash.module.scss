@@ -1,0 +1,20 @@
+// src/styles/UserDash.scss
+
+.userdash-container {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    padding: 2rem;
+    width: 100%;
+    min-height: 80vh; // keep within your app layout
+    color: white;
+  }
+  
+  
+  .dashboard-content {
+    flex: 1;
+    border-radius: 12px;
+    padding: 2rem;
+    backdrop-filter: blur(4px);
+  }
+  

@@ -131,6 +131,10 @@ body {
   max-width: 600px;
 }
 
+.userdash-container {
+  display: flex;
+}
+
 /* Animation */
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }

@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import "./App.css";
 
+
+
 // Import pages
 import PostsPage from "./pages/Posts";
 import LoginPage from "./pages/Login";
 import SignUpPage from "./pages/Signup";
+import UserDash from "./pages/UserDash";
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState("home"); // Start at "home"
@@ -30,12 +33,14 @@ const App = () => {
         currentPage === "posts" ? "container posts-container" : 
         currentPage === "login" ? "container login-container" : 
         currentPage === "signup" ? "container signup-container" : 
+        currentPage === "userdash" ? "container userdash-container" :
         "container"
         }>
         {/* Conditional Rendering of Pages */}
         {currentPage === "posts" && <PostsPage />}
-        {currentPage === "login" && <LoginPage />}
+        {currentPage === "login" && <LoginPage onLoginSuccess={handlePageChange}/>}
         {currentPage === "signup" && <SignUpPage />}
+        {currentPage === "userdash" && <UserDash onLogout={handlePageChange}/>}
       </div>
       
     </div>
