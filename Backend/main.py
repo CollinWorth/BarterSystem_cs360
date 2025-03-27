@@ -1,7 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from model import Todo
-from database import fetch_all_listings, startup
+from model import User, Todo, LoginRequest
+from database import fetch_all_listings, startup, users_collection
+from utils.security import hash_password 
+from bson import ObjectId
+from utils.security import verify_password
+
 
 origins = [
     "http://localhost:3000",  # Allow React app on localhost:3000
@@ -27,11 +31,6 @@ async def on_startup():
 def get_root():
     return {"Ping": "Pong"}
 
-@app.get("/api/get-todo/{nanoid}", response_model=Todo)
-async def get_one_todo(nanoid):
-    todo = await fetch_one_todo(nanoid)
-    if not todo: raise HTTPException(404)
-    return todo
 
 @app.get("/api/get-listings")
 async def get_listings():
@@ -39,20 +38,27 @@ async def get_listings():
     if not currentListings: raise HTTPException(404)
     return currentListings
 
-@app.post("/api/add-todo", response_model=Todo)
-async def add_todo(todo: Todo):
-    result = await create_todo(todo)
-    if not result: raise HTTPException(400)
-    return result
 
-@app.put("/api/update-todo/{nanoid}", response_model=Todo)
-async def update_todo(todo: Todo):
-    result = await change_todo(nanoid, title, desc, checked)
-    if not result: raise HTTPException(400)
-    return result
+@app.post("/api/register")
+async def register_user(user: User):
+    existing = await users_collection.find_one({"email": user.email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already in use.")
+    
+    user_dict = user.dict()
+    user_dict["password"] = hash_password(user_dict["password"])
+    result = await users_collection.insert_one(user_dict)
+    
+    return {"id": str(result.inserted_id), "email": user.email, "username": user.username}
+    
+@app.post("/api/login")
+async def login_user(credentials: LoginRequest):
+    user = await users_collection.find_one({"email": credentials.email})
+    if not user:
+        raise HTTPException(status_code=401, detail="Account not found. Please sign up.")
 
-@app.delete("/api/delete-todo/{nanoid}")
-async def delete_todo(nanoid):
-    result = await remove_todo(nanoid)
-    if not result: raise HTTPException(400)
-    return result
+    if not verify_password(credentials.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Incorrect password.")
+
+
+    return {"message": "Login successful", "username": user["username"]}
