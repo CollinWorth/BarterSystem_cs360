@@ -6,11 +6,23 @@ html, body {
   font-family: Arial, sans-serif;
 }
 
-/* Background (more muted) */
+/* Background */
 body {
   background: linear-gradient(45deg, #4b2409, #560a33, #064d57, #310e50);
   background-size: 200% 200%;
   animation: gradientAnimation 15s ease-in-out infinite;
+}
+
+/* Button Styling */
+button{
+  background-color: #000000;
+  color: rgb(248, 223, 30);
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  &:hover{
+      background-color: #414141;
+  }
 }
 
 /* Gradient Animation */
@@ -95,20 +107,6 @@ body {
   display:block;
 }
 
-/* Button Styling */
-.button {
-  padding: 10px 50px;
-  background-color: #7d6704;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.button:hover {
-  background-color: yellow;
-}
 
 .title {
   padding-bottom: 150px;
@@ -139,4 +137,8 @@ body {
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
+}
+
+.bounce {
+  animation: bounce 2s infinite;
 }

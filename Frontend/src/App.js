@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import "./App.css";
 
-
-
 // Import pages
 import PostsPage from "./pages/Posts";
 import LoginPage from "./pages/Login";
@@ -20,7 +18,7 @@ const App = () => {
     <div className="app-container">
       {/* Top Navigation Bar */}
       <div className="top-bar">
-        <div className="logo" onClick ={() => handlePageChange("home")}>HaggleHub</div>
+        <div className="logo" onClick={() => handlePageChange("home")}>HaggleHub</div>
         <div className="nav-buttons">
           <button onClick={() => handlePageChange("posts")}>Posts</button>
           <button onClick={() => handlePageChange("login")}>Login</button>
@@ -35,14 +33,22 @@ const App = () => {
         currentPage === "signup" ? "container signup-container" : 
         currentPage === "userdash" ? "container userdash-container" :
         "container"
-        }>
+      }>
         {/* Conditional Rendering of Pages */}
         {currentPage === "posts" && <PostsPage />}
-        {currentPage === "login" && <LoginPage onLoginSuccess={handlePageChange}/>}
+        {currentPage === "login" && <LoginPage onLoginSuccess={handlePageChange} />}
         {currentPage === "signup" && <SignUpPage />}
-        {currentPage === "userdash" && <UserDash onLogout={handlePageChange}/>}
+        {currentPage === "userdash" && <UserDash onLogout={handlePageChange} />}
+        
+        {/* Home Page Content */}
+        {currentPage === "home" && (
+          <div className="home-content">
+            <h1 class="bounce">Welcome to Haggle Hub! </h1>
+            <p>The marketplace where <strong>buyers and sellers</strong> negotiate the best deals! List your items, make offers, and haggle your way to the perfect price.</p>
+            <p>Start exploring now!</p>
+          </div>
+        )}
       </div>
-      
     </div>
   );
 };

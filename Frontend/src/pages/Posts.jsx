@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import PostCard from '../components/PostCard';  // Import PostCard component
-import HagglePopup from '../components/HagglePopup';  // Import HagglePopup component
-import '../components/Posts.module.scss';  // Import SCSS for styles
+import PostCard from '../components/PostCard';  
+import HagglePopup from '../components/HagglePopup';  
+import '../components/Posts.module.scss';  
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
-
   const [selectedPost, setSelectedPost] = useState(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch ('http://localhost:8000/api/get-listings');
+        const response = await fetch('http://localhost:8000/api/get-listings');
         const data = await response.json();
         setPosts(data);
       } catch (error) {
-        console.error("Error fetching posts:",error);
+        console.error("Error fetching posts:", error);
       }
     };
 
@@ -24,10 +24,12 @@ const Posts = () => {
 
   const handleHaggleClick = (post) => {
     setSelectedPost(post);
+    setOpen(true);
   };
 
-  const closePopup = () => {
+  const handleClose = () => {
     setSelectedPost(null);
+    setOpen(false);
   };
 
   return (
@@ -37,13 +39,8 @@ const Posts = () => {
         <PostCard key={post._id} post={post} onHaggleClick={handleHaggleClick} />
       ))}
 
-    {selectedPost && (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <HagglePopup post={selectedPost} onClose={closePopup} />
-        </div>
-      </div>
-    )}
+      {/* Pass the selected post and modal state to HagglePopup */}
+      {selectedPost && <HagglePopup post={selectedPost} onClose={handleClose} open={open} />}
     </div>
   );
 };

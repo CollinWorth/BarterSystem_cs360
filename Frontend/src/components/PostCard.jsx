@@ -5,11 +5,28 @@ const PostCard = ({ post, onHaggleClick }) => {
   return (
     <div className={styles['post-card-container']}> {/* Applying the more specific container */}
       <div className={styles['post-card']}>
-        <h3>{post.name}</h3>
+      <div style={{ display: "flex", alignItems: "left", gap: "10px" }}>
+  <h2>{post.name}</h2>
+</div>
         <p>{post.description}</p>
-        <p>{post.quantity}</p>
+        <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "flex-start" 
+          }}>
+          <p>Quantity:</p>
+          <p style={{ 
+              color: 'orange', 
+              fontWeight: 'bold', 
+              marginTop: '10px', 
+              marginLeft: '25px'
+          }}>
+            {post.quantity}
+          </p>
+        </div>
         <img src={post.photo} alt="Image description" />
-        <button onClick={() => onHaggleClick(post)}>Haggle</button>
+        <button className='styles.button' onClick={() => onHaggleClick(post)}>Haggle</button>
+        
       </div>
     </div>
   );
