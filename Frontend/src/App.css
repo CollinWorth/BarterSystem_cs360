@@ -53,7 +53,7 @@ button{
   top: 0;
   left: 0;
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgb(0, 0, 0);
   color: #fff;
   padding: 15px 20px;
   display: flex;
@@ -88,7 +88,6 @@ button{
   margin-top: 80px; /* Offset for fixed top bar */
   padding: 20px;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.1);
   width: 100%;
   min-height: 100vh;
   display: flex;

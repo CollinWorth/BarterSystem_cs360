@@ -3,18 +3,18 @@ import styles from './PostCard.module.scss';
 
 const PostCard = ({ post, onHaggleClick }) => {
   return (
-    <div className={styles['post-card-container']}> {/* Applying the more specific container */}
-      <div className={styles['post-card']}>
-      <div style={{ display: "flex", alignItems: "left", gap: "10px" }}>
-  <h2>{post.name}</h2>
-</div>
+    <div className={styles.postCardContainer}> 
+      <div className={styles.postCard}>
+        
+        {/* Post Title */}
+        <h2>{post.name}</h2>
+
+        {/* Post Description */}
         <p>{post.description}</p>
-        <div style={{ 
-            display: "flex", 
-            flexDirection: "column", 
-            alignItems: "flex-start" 
-          }}>
-          <p>Quantity:</p>
+
+        {/* Quantity Section */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+          <h2>Quantity:</h2>
           <p style={{ 
               color: 'orange', 
               fontWeight: 'bold', 
@@ -24,9 +24,20 @@ const PostCard = ({ post, onHaggleClick }) => {
             {post.quantity}
           </p>
         </div>
-        <img src={post.photo} alt="Image description" />
-        <button className='styles.button' onClick={() => onHaggleClick(post)}>Haggle</button>
-        
+
+        {/* Post Image */}
+        <img 
+          className={styles.right}
+          src={post.photo} 
+          alt="Image description" 
+          style={{ maxWidth: "100%", height: "auto", borderRadius: "10px" }} 
+        />
+
+        {/* Haggle Button */}
+        <button className={`${styles.button} ${styles.right}`} onClick={() => onHaggleClick(post)}>
+          Haggle
+        </button>
+
       </div>
     </div>
   );
