@@ -17,6 +17,7 @@ return(
     <div className={styles.sidebar}>
       <h2>{user?.username}</h2>
       <ul>
+        {user.admin && <li><a onClick={() => setActiveTab("adminDash")}>Admin Dashboard</a></li>}
         <li><a onClick={() => setActiveTab("settings")}>User Settings</a></li>
         <li><a onClick={() => setActiveTab("items")}>My Items</a></li>
         <li><a onClick={handleLogout}>Logout</a></li>
@@ -24,6 +25,16 @@ return(
     </div>
 
   <main className="userdash-content">
+    {activeTab === "adminDash" && (
+      <div>
+        <h2>Admin Dashboard</h2>
+        <ul>
+          <li><a>Add Items</a></li>
+          <li><a>Manage Users</a></li>
+        </ul>
+      </div>
+    )}
+
     {activeTab === "settings" && (
       <div>
         <h2>User Settings</h2>
