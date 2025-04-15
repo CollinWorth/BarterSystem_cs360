@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import components from '../components/Signup.module.scss';
 import AddressInput from '../components/AddressInput.jsx';
 
-const Signup = () => {
+const Signup = ({onSignupSuccess}) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -57,6 +57,7 @@ const Signup = () => {
       if (response.ok) {
         const data = await response.json();
         console.log("✅ Successfully registered", data);
+        onSignupSuccess("login"); //redirect to login
       } else {
         const err = await response.json();
         console.error("❌ Registration failed:", err.detail);

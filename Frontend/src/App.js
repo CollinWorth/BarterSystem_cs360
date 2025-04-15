@@ -50,7 +50,7 @@ const App = () => {
         {/* Conditional Rendering of Pages */}
         {currentPage === "posts" && <PostsPage />}
         {currentPage === "login" && <LoginPage onLoginSuccess={handlePageChange} />}
-        {currentPage === "signup" && <SignUpPage />}
+        {currentPage === "signup" && <SignUpPage onSignupSuccess={handlePageChange} />}
         {currentPage === "userdash" && <UserDash onLogout={handlePageChange} />}
         
         {/* Home Page Content */}

@@ -12,6 +12,11 @@ const UserDash = ({ onLogout }) => {
     onLogout("login");
   }
 
+ // const handleAddItem = async (e) => {
+ //   e.preventDefault();
+ //
+ // }
+
 return(
   <div className="userdash-wrapper">
     <div className={styles.sidebar}>
