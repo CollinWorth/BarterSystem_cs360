@@ -21,7 +21,7 @@ const Login = ({ onLoginSuccess }) => {
   
       if (response.ok) {
         const data = await response.json();
-        login(data.username); // Auth context login
+        login(data); // Auth context login
         onLoginSuccess("userdash"); // redirect
       } else {
         const errorData = await response.json();

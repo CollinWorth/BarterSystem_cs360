@@ -71,7 +71,7 @@ async def register_user(user: User):
     user_dict["password"] = hash_password(user_dict["password"])
     result = await users_collection.insert_one(user_dict)
     
-    return {"id": str(result.inserted_id), "email": user.email, "username": user.username}
+    return {"id": str(result.inserted_id), "email": user.email, "username": user.username, "role": user.role }
     
 @app.post("/api/login")
 async def login_user(credentials: LoginRequest):
@@ -83,4 +83,14 @@ async def login_user(credentials: LoginRequest):
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
 
-    return {"message": "Login successful", "username": user["username"]}
+    return {"message": "Login successful", "username": user["username"], "email": user["email"], "role": user.get("role","user")}
+
+@app.post("/api/promote")
+async def promote_to_admin(email: str):
+    result = await users_collection.update_one(
+        {"email": email},
+        {"$set": {"role": "admin"}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return {"message": f"{email} promoted to admin"}

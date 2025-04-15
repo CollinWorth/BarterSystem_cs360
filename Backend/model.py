@@ -30,6 +30,7 @@ class User(BaseModel):
 	email: EmailStr
 	password: str
 	address: Address
+	role: Optional[str] = "user"
 
 	class Config:
 		from_attributes = True

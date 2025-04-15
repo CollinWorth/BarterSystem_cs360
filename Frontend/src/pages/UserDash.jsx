@@ -6,7 +6,7 @@ import styles from '../components/Sidebar.module.scss';
 const UserDash = ({ onLogout }) => {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("settings");
-
+  console.log("User in context: ", user);
   const handleLogout = () =>{
     logout();
     onLogout("login");
@@ -17,7 +17,7 @@ return(
     <div className={styles.sidebar}>
       <h2>{user?.username}</h2>
       <ul>
-        {user.admin && <li><a onClick={() => setActiveTab("adminDash")}>Admin Dashboard</a></li>}
+        {user?.role === "admin" && <li><a onClick={() => setActiveTab("adminDash")}>Admin Dashboard</a></li>}
         <li><a onClick={() => setActiveTab("settings")}>User Settings</a></li>
         <li><a onClick={() => setActiveTab("items")}>My Items</a></li>
         <li><a onClick={handleLogout}>Logout</a></li>
