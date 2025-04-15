@@ -17,8 +17,8 @@ if not DATABASE_URI:
 client = motor.motor_asyncio.AsyncIOMotorClient(DATABASE_URI)
 
 # Select the database and collection
-database = client.barterDB  # Replace with your database name
-collection = database.currentListings  # Replace with your collection name
+database = client.barterDB 
+listings_collection = database.currentListings 
 users_collection = database["users"]
 
 # Function to check the connection to MongoDB

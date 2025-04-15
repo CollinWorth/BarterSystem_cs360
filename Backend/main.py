@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from model import User, Todo, LoginRequest
-from database import fetch_all_listings, startup, users_collection
+from database import fetch_all_listings, startup, users_collection, listings_collection, database
 from utils.security import hash_password 
 from bson import ObjectId
 from utils.security import verify_password
+from fastapi.responses import JSONResponse
 
 
 origins = [
@@ -38,6 +39,27 @@ async def get_listings():
     if not currentListings: raise HTTPException(404)
     return currentListings
 
+@app.get("/api/InventoryOptions")
+async def get_inventory_options(userId: str):
+    try:
+        user_object_id = ObjectId(userId)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid userId format")
+
+    group = database.groups.find_one({ "members": user_object_id })
+
+    if not group:
+        raise HTTPException(status_code=404, detail="No group found for this user")
+
+    listings = list(database.listings.find({
+        "ownerId": { "$in": group["members"] }
+    }))
+
+    for listing in listings:
+        listing["_id"] = str(listing["_id"])
+        listing["ownerId"] = str(listing["ownerId"])
+
+    return JSONResponse(content=listings)
 
 @app.post("/api/register")
 async def register_user(user: User):

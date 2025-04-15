@@ -1,13 +1,36 @@
-import React, { useState } from "react";
-import { Modal, Box, Typography, Button, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
-import styles from './HagglePopup.module.scss';
+import React, { useState, useEffect } from "react";
+import {
+  Modal,
+  Box,
+  Typography,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  TextField
+} from "@mui/material";
+import styles from "./HagglePopup.module.scss";
 
 const HagglePopup = ({ post, open, onClose }) => {
-  const [dropdown1, setDropdown1] = useState("Option1");
-  const [dropdown2, setDropdown2] = useState("Option1");
+  const [dropdown1Options, setDropdown1Options] = useState([]);
+  const [selected1, setSelected1] = useState("");
+  const [quantity, setQuantity] = useState(1); // small text box
 
-  const handleDropdown1Change = (e) => setDropdown1(e.target.value);
-  const handleDropdown2Change = (e) => setDropdown2(e.target.value);
+  // Fetch options on mount
+  useEffect(() => {
+    const fetchOptions = async () => {
+      //const res1 = await fetch('/api/InventoryOptions?userId=${userId}'); // userId not availible yet
+      const res1 = await fetch('/api/InventoryOptions?userId=67e57c5a312e8fd4e61bd264'); // temporty test for user (collin)
+      const data1 = await res1.json();
+      setDropdown1Options(data1);
+    };
+
+    fetchOptions();
+  }, []);
+
+  const handleDropdown1Change = (e) => setSelected1(e.target.value);
+  const handleQuantityChange = (e) => setQuantity(e.target.value);
 
   const style = {
     position: "absolute",
@@ -22,37 +45,75 @@ const HagglePopup = ({ post, open, onClose }) => {
   };
 
   return (
-    <Modal open={open} onClose={onClose} aria-labelledby="haggle-modal-title" aria-describedby="haggle-modal-description">
-      <Box className='modal' sx={style}>
-        <Typography id="haggle-modal-title" variant="h6">
-          Haggle for {post.title}
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="haggle-modal-title"
+      aria-describedby="haggle-modal-description"
+    >
+      <Box className="modal" sx={style}>
+        <Typography variant="h6">
+          Haggle for {post?.name || "Unknown Item"}
         </Typography>
         <Typography id="haggle-modal-description" sx={{ mt: 2 }}>
           {post.body}
         </Typography>
 
-        {/* Dropdown 1 */}
+        {/* Quantity Field */}
         <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel>Dropdown 1</InputLabel>
-          <Select value={dropdown1} onChange={handleDropdown1Change}>
-            <MenuItem value="Option1">Option 1</MenuItem>
-            <MenuItem value="Option2">Option 2</MenuItem>
-            <MenuItem value="Option3">Option 3</MenuItem>
-          </Select>
+          <TextField
+            label="Quantity"
+            type="number"
+            value={quantity}
+            onChange={handleQuantityChange}
+            inputProps={{ min: 1 }}
+          />
         </FormControl>
 
         {/* Dropdown 2 */}
         <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel>Dropdown 2</InputLabel>
-          <Select value={dropdown2} onChange={handleDropdown2Change}>
-            <MenuItem value="Option1">Option 1</MenuItem>
-            <MenuItem value="Option2">Option 2</MenuItem>
-            <MenuItem value="Option3">Option 3</MenuItem>
+          <InputLabel>Choose Inventory Item</InputLabel>
+          <Select value={selected1} onChange={handleDropdown1Change}>
+            {dropdown1Options.map((option, index) => (
+              <MenuItem key={index} value={option}>
+                {option}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
+        {/* Quantity Field */}
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <TextField
+            label="Quantity"
+            type="number"
+            value={quantity}
+            onChange={handleQuantityChange}
+            inputProps={{ min: 1 }}
+          />
+        </FormControl>
+
+        {/* Submit Button */}
+        <Button
+          className={styles.button}
+          onClick={() => {
+            // Handle submit logic here
+            console.log("Submit", { selected1, quantity });
+            onClose();
+          }}
+          variant="contained"
+          sx={{ mt: 3, width: "100%" }}
+          >
+            Submit
+          </Button>
+
         {/* Close Button */}
-        <Button className= {styles.button} onClick={onClose} variant="contained" sx={{ mt: 3, width: "100%" }}>
+        <Button
+          className={styles.button}
+          onClick={onClose}
+          variant="contained"
+          sx={{ mt: 3, width: "100%" }}
+        >
           Close
         </Button>
       </Box>
