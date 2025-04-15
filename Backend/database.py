@@ -33,7 +33,7 @@ async def check_mongo_connection():
 # Fetch all listings
 async def fetch_all_listings():
     currentListings = []
-    cursor = collection.find()
+    cursor = listings_collection.find()
     async for doc in cursor:
         currentListings.append(Listing(**doc))
     print(f"Fetched {len(currentListings)} listings")
