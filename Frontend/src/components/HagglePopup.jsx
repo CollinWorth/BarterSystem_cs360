@@ -18,6 +18,7 @@ const HagglePopup = ({ post, open, onClose }) => {
   const [quantity, setQuantity] = useState(1); // small text box
 
   // Fetch options on mount
+  
   useEffect(() => {
     const fetchOptions = async () => {
       //const res1 = await fetch('/api/InventoryOptions?userId=${userId}'); // userId not availible yet
@@ -29,6 +30,15 @@ const HagglePopup = ({ post, open, onClose }) => {
     fetchOptions();
   }, []);
 
+/*
+  // Test ////
+  useEffect(() => {
+    const fakeData = ["Item A", "Item B", "Item C"];
+    setDropdown1Options(fakeData);
+    setDropdown2Options(["Other A", "Other B"]);
+  }, []);
+  /////
+*/
   const handleDropdown1Change = (e) => setSelected1(e.target.value);
   const handleQuantityChange = (e) => setQuantity(e.target.value);
 
