@@ -6,6 +6,7 @@ from utils.security import hash_password
 from bson import ObjectId
 from utils.security import verify_password
 from fastapi.responses import JSONResponse
+from fastapi import Query
 
 
 origins = [
@@ -60,6 +61,21 @@ async def get_inventory_options(userId: str):
         listing["ownerId"] = str(listing["ownerId"])
 
     return JSONResponse(content=listings)
+
+@app.get("/api/get-listing/{listing_id}")
+async def get_listing(listing_id: str):
+    try:
+        listing_object_id = ObjectId(listing_id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid listing_id format")
+
+    listing = await listings_collection.find_one({"_id": listing_object_id})
+    if not listing:
+        raise HTTPException(status_code=404, detail="Listing not found")
+
+    # Convert ObjectId to string for JSON serialization
+    listing["_id"] = str(listing["_id"])
+    return listing
 
 @app.post("/api/register")
 async def register_user(user: User):
