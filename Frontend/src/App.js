@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
+import { useAuth } from "./context/AuthContext";
+import {FaUserCircle} from "react-icons/fa";
 
 // Import pages
 import PostsPage from "./pages/Posts";
@@ -9,6 +11,8 @@ import UserDash from "./pages/UserDash";
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState("home"); // Start at "home"
+
+  const { user } = useAuth();
 
   const handlePageChange = (page) => {
     setCurrentPage(page); // Change the page when button is clicked
@@ -21,8 +25,17 @@ const App = () => {
         <div className="logo" onClick={() => handlePageChange("home")}>HaggleHub</div>
         <div className="nav-buttons">
           <button onClick={() => handlePageChange("posts")}>Posts</button>
-          <button onClick={() => handlePageChange("login")}>Login</button>
-          <button onClick={() => handlePageChange("signup")}>Sign Up</button>
+          {!user ? (<>
+            <button onClick={() => handlePageChange("login")}>Login</button>
+            <button onClick={() => handlePageChange("signup")}>Sign Up</button>
+          </>) : (
+            <button className="user-icon-button" 
+            onClick={()=> handlePageChange("userdash")}
+            title="Go To Dashboard">
+              <FaUserCircle size={28} /> 
+            </button>
+          )}
+          
         </div>
       </div>
 
