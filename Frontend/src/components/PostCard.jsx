@@ -4,42 +4,28 @@ import styles from './PostCard.module.scss';
 const PostCard = ({ post, onHaggleClick }) => {
   return (
     <div className={styles.postCardContainer}> 
-      <div className={styles.postCard}>
-        
-        {/* Post Title */}
-        <h2>{post.name}</h2>
+  <div className={styles.postCard}>
 
-        {/* Post Description */}
-        <p>{post.description}</p>
-
-        {/* Quantity Section */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-          <h2>Quantity:</h2>
-          <p style={{ 
-              color: 'orange', 
-              fontWeight: 'bold', 
-              marginTop: '10px', 
-              marginLeft: '25px'
-          }}>
-            {post.quantity}
-          </p>
-        </div>
-
-        {/* Post Image */}
-        <img 
-          className={styles.right}
-          src={post.photo} 
-          alt="Image description" 
-          style={{ maxWidth: "100%", height: "auto", borderRadius: "10px" }} 
-        />
-
-        {/* Haggle Button */}
-        <button className={`${styles.button} ${styles.right}`} onClick={() => onHaggleClick(post)}>
-          Haggle
-        </button>
-
+    <div>
+      <h2>{post.name}</h2>
+      <p>{post.description}</p>
+      <div>
+        <h4>Quantity:</h4>
+        <p style={{ color: '#0077b6', fontWeight: 'bold' }}>{post.quantity}</p>
       </div>
+      <button className={styles.button} onClick={() => onHaggleClick(post)}>
+        Haggle
+      </button>
     </div>
+
+    <img 
+      className={styles.right}
+      src={post.photo} 
+      alt="Post" 
+    />
+    
+  </div>
+</div>
   );
 };
 

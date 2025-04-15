@@ -8,9 +8,11 @@ html, body {
 
 /* Background */
 body {
-  background: linear-gradient(45deg, #4b2409, #560a33, #064d57, #310e50);
+  background-color: #1c1c1e;
+  /*background: linear-gradient(45deg, #4b2409, #560a33, #064d57, #310e50);
   background-size: 200% 200%;
   animation: gradientAnimation 15s ease-in-out infinite;
+  */
 }
 
 /* Button Styling */
