@@ -32,3 +32,41 @@
     }
   }
   
+  .dropdown {
+    position: relative;
+  
+    a {
+      display: block;
+      cursor: pointer;
+    }
+  
+    &:hover .dropdownMenu {
+      display: block;
+    }
+  }
+  
+  .dropdownMenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    background-color: #1f2937;
+    border-left: 2px solid #facc15;
+    padding: 0.5rem;
+    list-style: none;
+    z-index: 20;
+  
+    li {
+      margin: 0.5rem 0;
+  
+      a {
+        color: #facc15;
+        text-decoration: none;
+  
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+  

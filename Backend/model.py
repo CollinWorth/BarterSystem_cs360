@@ -34,3 +34,10 @@ class User(BaseModel):
 
 	class Config:
 		from_attributes = True
+
+
+class Item(BaseModel):
+    name: str
+    description: str
+    image: Optional[str]
+    relative_value: int

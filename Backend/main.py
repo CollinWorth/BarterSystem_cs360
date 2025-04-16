@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from model import User, Todo, LoginRequest
+from model import User, Todo, LoginRequest, Item
 from database import fetch_all_listings, startup, users_collection, listings_collection, database
 from utils.security import hash_password 
 from bson import ObjectId
@@ -110,3 +110,16 @@ async def promote_to_admin(email: str):
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="User not found.")
     return {"message": f"{email} promoted to admin"}
+
+@app.post("/api/items")
+async def create_item(item: Item):
+    item_dict = item.dict()
+    result = await database["items"].insert_one(item_dict)
+    return {"id": str(result.inserted_id)}
+
+@app.get("/api/items")
+async def get_items():
+    items = await database["items"].find().to_list(1000)
+    for item in items:
+        item["_id"] = str(item["_id"])
+    return items

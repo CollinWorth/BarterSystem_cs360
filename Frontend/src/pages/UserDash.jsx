@@ -2,6 +2,7 @@ import React , { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import '../components/UserDash.module.scss';
 import styles from '../components/Sidebar.module.scss';
+import AddItemForm from '../components/ItemForm';
 
 const UserDash = ({ onLogout }) => {
   const { user, logout } = useAuth();
@@ -22,7 +23,13 @@ return(
     <div className={styles.sidebar}>
       <h2>{user?.username}</h2>
       <ul>
-        {user?.role === "admin" && <li><a onClick={() => setActiveTab("adminDash")}>Admin Dashboard</a></li>}
+        {user?.role === "admin" && (<li className={styles.dropdown}>
+          <a onClick={() => setActiveTab("adminDash")}>Admin Dashboard ▾</a>
+          <ul className={styles.dropdownMenu}>
+            <li><a onClick={() => setActiveTab("addItems")}>➕ Add Items</a></li>
+            <li><a onClick={() => setActiveTab("manageUsers")}>👥 Manage Users</a></li>
+          </ul>
+          </li>)}
         <li><a onClick={() => setActiveTab("settings")}>User Settings</a></li>
         <li><a onClick={() => setActiveTab("items")}>My Items</a></li>
         <li><a onClick={handleLogout}>Logout</a></li>
@@ -33,10 +40,20 @@ return(
     {activeTab === "adminDash" && (
       <div>
         <h2>Admin Dashboard</h2>
-        <ul>
-          <li><a>Add Items</a></li>
-          <li><a>Manage Users</a></li>
-        </ul>
+      </div>
+    )}
+
+    {activeTab === "addItems" && (
+      <div>
+        <h2> Add Items</h2>
+        <AddItemForm/>
+      </div>
+    )}
+
+    {activeTab === "manageUsers" && (
+      <div>
+        <h2> Manage Users</h2>
+        <p>Coming Soon</p>
       </div>
     )}
 
