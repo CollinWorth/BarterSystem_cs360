@@ -20,6 +20,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient(DATABASE_URI)
 database = client.barterDB 
 listings_collection = database.currentListings 
 users_collection = database["users"]
+haggles_collhection = database["haggles"]
 
 # Function to check the connection to MongoDB
 async def check_mongo_connection():

@@ -41,3 +41,12 @@ class Item(BaseModel):
     description: str
     image: Optional[str]
     relative_value: int
+
+class Haggle(BaseModel):
+    senderId: str
+    recipientId: str
+    senderItemId: str
+    senderItemQuantity: int
+    recipientItemId: str
+    recipientItemQuantity: int
+    status: str = "pending"
