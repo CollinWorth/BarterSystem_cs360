@@ -18,13 +18,13 @@
   grid-gap: 2rem;
   align-items: center;
   color: #f1f1f1; /* readable text color */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 28px rgba(158, 106, 43, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .postCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(255, 227, 45, 0.356);
 }
 
 .button {

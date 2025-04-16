@@ -47,20 +47,49 @@ async def get_inventory_options(userId: str):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid userId format")
 
-    group = database.groups.find_one({ "members": user_object_id })
-
+    # Await this call!
+    group = await database.groups.find_one({"members": user_object_id})
     if not group:
         raise HTTPException(status_code=404, detail="No group found for this user")
 
-    listings = list(database.listings.find({
-        "ownerId": { "$in": group["members"] }
-    }))
+    # Await the cursor, turn to list
+    item_belongs_cursor = database.itemBelongs.find({
+        "userId": {"$in": group["members"]}
+    })
+    item_belongs = await item_belongs_cursor.to_list(length=None)
 
-    for listing in listings:
-        listing["_id"] = str(listing["_id"])
-        listing["ownerId"] = str(listing["ownerId"])
+    results = []
+    for item in item_belongs:
+        item_id = item["itemId"]
+        item_obj_id = ObjectId(item_id) if isinstance(item_id, str) else item_id
 
-    return JSONResponse(content=listings)
+        # Await item lookup
+        item_doc = await database.items.find_one({"_id": item_obj_id})
+        item_name = item_doc["name"] if item_doc else "Unknown Item"
+
+        results.append({
+            "_id": str(item["_id"]),
+            "userId": str(item["userId"]),
+            "itemId": str(item["itemId"]),
+            "quantity": item.get("quantity", 1),
+            "name": item_name
+        })
+
+    return results
+
+@app.get("/api/item-name")
+async def get_item_name(id: str = Query(..., alias="id")):
+    try:
+        item_object_id = ObjectId(id)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid item ID format")
+
+    item = await database.items.find_one({ "_id": item_object_id })
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    return item["name"] 
 
 @app.get("/api/get-listing/{listing_id}")
 async def get_listing(listing_id: str):

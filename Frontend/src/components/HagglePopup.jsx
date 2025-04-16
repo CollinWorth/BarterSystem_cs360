@@ -8,24 +8,39 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  TextField
+  TextField,
 } from "@mui/material";
 
-const HagglePopup = ({ post, open, onClose }) => {
+const HagglePopup = ({ open, onClose, post }) => {
   const [dropdown1Options, setDropdown1Options] = useState([]);
-  const [selected1, setSelected1] = useState("");
+  const [selected1, setSelected1] = useState(""); // Ensure selected1 is a string
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const fetchOptions = async () => {
-      const res1 = await fetch('/api/InventoryOptions?userId=67e57c5a312e8fd4e61bd264');
-      const data1 = await res1.json();
-      setDropdown1Options(data1);
+      try {
+        const res1 = await fetch(
+          "/api/InventoryOptions?userId=67e57c5a312e8fd4e61bd264"
+        );
+        const data1 = await res1.json();
+        console.log("Fetched data:", data1);
+
+        // Check if we got the right structure
+        if (Array.isArray(data1)) {
+          setDropdown1Options(data1); // Store the full objects
+        } else {
+          console.error("Fetched data is not an array or has issues.");
+          setDropdown1Options([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch or parse JSON", err);
+        setDropdown1Options([]);
+      }
     };
     fetchOptions();
   }, []);
 
-  const handleDropdown1Change = (e) => setSelected1(e.target.value);
+  const handleDropdown1Change = (e) => setSelected1(e.target.value.toString()); // Ensure selected1 is a string
   const handleQuantityChange = (e) => setQuantity(e.target.value);
 
   const style = {
@@ -34,8 +49,8 @@ const HagglePopup = ({ post, open, onClose }) => {
     left: "50%",
     transform: "translate(-50%, -50%)",
     width: 400,
-    bgcolor: "#1e1e1e", // dark background
-    color: "#f7c518", // gold text
+    bgcolor: "#1e1e1e",
+    color: "#f7c518",
     boxShadow: 24,
     p: 4,
     borderRadius: 2,
@@ -97,30 +112,32 @@ const HagglePopup = ({ post, open, onClose }) => {
         </FormControl>
 
         <FormControl fullWidth sx={{ mt: 2 }}>
-          <InputLabel sx={{ color: "#f7c518" }}>Choose Inventory Item</InputLabel>
-          <Select
-            value={selected1}
-            onChange={handleDropdown1Change}
-            sx={{
-              color: "#f7c518",
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#f7c518",
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#fff",
-              },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#fff",
-              },
-            }}
-          >
-            {dropdown1Options.map((option, index) => (
-              <MenuItem key={index} value={option} sx={{ color: "#000" }}>
-                {option}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+  <InputLabel sx={{ color: "#f7c518" }}>
+    Choose Inventory Item
+  </InputLabel>
+  <Select
+    value={selected1}
+    onChange={handleDropdown1Change}
+    sx={{
+      color: "#f7c518",
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#f7c518",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#fff",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#fff",
+      },
+    }}
+  >
+    {dropdown1Options.map((option, index) => (
+      <MenuItem key={index} value={option.itemId} sx={{ color: "#000" }}>
+        {option.name || "Unknown Item"} {/* Display the name or fallback */}
+      </MenuItem>
+    ))}
+  </Select>
+</FormControl>
 
         <Button
           onClick={() => {
@@ -133,11 +150,7 @@ const HagglePopup = ({ post, open, onClose }) => {
           Submit
         </Button>
 
-        <Button
-          onClick={onClose}
-          variant="contained"
-          sx={buttonSx}
-        >
+        <Button onClick={onClose} variant="contained" sx={buttonSx}>
           Close
         </Button>
       </Box>
