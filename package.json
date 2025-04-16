@@ -1,5 +1,11 @@
 {
+  "name": "barter-system",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
     "react-icons": "^5.5.0"
-  }
+  },
+  "scripts": {
+  },
+  "proxy": "http://localhost:8000"
 }

@@ -15,33 +15,53 @@ const HagglePopup = ({ open, onClose, post }) => {
   const [dropdown1Options, setDropdown1Options] = useState([]);
   const [selected1, setSelected1] = useState(""); // Ensure selected1 is a string
   const [quantity, setQuantity] = useState(1);
+  const [tradeItem, setTradeItem] = useState(""); // For trade item selection
+  const [tradeQuantity, setTradeQuantity] = useState(1); // For trade item quantity
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const res1 = await fetch(
-          "/api/InventoryOptions?userId=67e57c5a312e8fd4e61bd264"
-        );
-        const data1 = await res1.json();
-        console.log("Fetched data:", data1);
+        const res = await fetch("http://localhost:8000/api/InventoryOptions?userId=67f4a03408163838cafdd81e");
+        const contentType = res.headers.get("content-type");
+        console.log("Status:", res.status);
+        console.log("Content-Type:", contentType);
 
-        // Check if we got the right structure
-        if (Array.isArray(data1)) {
-          setDropdown1Options(data1); // Store the full objects
-        } else {
-          console.error("Fetched data is not an array or has issues.");
+        const text = await res.text(); // Get the raw text
+        console.log("Raw response text:", text);
+
+        if (!res.ok) {
+          console.error(`API error (${res.status})`, text);
+          throw new Error("Non-200 response");
+        }
+
+        try {
+          const data = JSON.parse(text); // Try parsing manually
+          console.log("Parsed JSON:", data);
+
+          if (Array.isArray(data)) {
+            setDropdown1Options(data);
+          } else {
+            console.error("Fetched data is not an array.");
+            setDropdown1Options([]);
+          }
+        } catch (parseErr) {
+          console.error("JSON parsing failed", parseErr);
           setDropdown1Options([]);
         }
+
       } catch (err) {
-        console.error("Failed to fetch or parse JSON", err);
+        console.error("Failed to fetch or process data:", err);
         setDropdown1Options([]);
       }
     };
+
     fetchOptions();
   }, []);
 
   const handleDropdown1Change = (e) => setSelected1(e.target.value.toString()); // Ensure selected1 is a string
   const handleQuantityChange = (e) => setQuantity(e.target.value);
+  const handleTradeItemChange = (e) => setTradeItem(e.target.value); // Handle trade item
+  const handleTradeQuantityChange = (e) => setTradeQuantity(e.target.value); // Handle trade quantity
 
   const style = {
     position: "absolute",
@@ -84,6 +104,31 @@ const HagglePopup = ({ open, onClose, post }) => {
     },
   };
 
+  const handleSubmit = async () => {
+    const requestData = {
+      selected1,
+      quantity,
+      tradeItem,
+      tradeQuantity,
+    };
+    console.log("Sending request data:", requestData);
+    // Send data to your API
+    try {
+      const response = await fetch("http://localhost:8000/api/submit-haggle", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+      const data = await response.json();
+      console.log("API Response:", data);
+      onClose(); // Close the modal after submission
+    } catch (error) {
+      console.error("Error submitting data:", error);
+    }
+  };
+
   return (
     <Modal
       open={open}
@@ -112,38 +157,47 @@ const HagglePopup = ({ open, onClose, post }) => {
         </FormControl>
 
         <FormControl fullWidth sx={{ mt: 2 }}>
-  <InputLabel sx={{ color: "#f7c518" }}>
-    Choose Inventory Item
-  </InputLabel>
-  <Select
-    value={selected1}
-    onChange={handleDropdown1Change}
-    sx={{
-      color: "#f7c518",
-      "& .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#f7c518",
-      },
-      "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#fff",
-      },
-      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: "#fff",
-      },
-    }}
-  >
-    {dropdown1Options.map((option, index) => (
-      <MenuItem key={index} value={option.itemId} sx={{ color: "#000" }}>
-        {option.name || "Unknown Item"} {/* Display the name or fallback */}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+          <InputLabel sx={{ color: "#f7c518" }}>
+            Choose Inventory Item
+          </InputLabel>
+          <Select
+            value={selected1}
+            onChange={handleDropdown1Change}
+            sx={{
+              color: "#f7c518",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#f7c518",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#fff",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#fff",
+              },
+            }}
+          >
+            {dropdown1Options.map((option) => (
+              <MenuItem key={option._id} value={option.itemId}>
+                {option.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <TextField
+            label="Quantity for Trade Item"
+            type="number"
+            value={tradeQuantity}
+            onChange={handleTradeQuantityChange}
+            inputProps={{ min: 1 }}
+            InputLabelProps={{ style: { color: "#f7c518" } }}
+            sx={inputSx}
+          />
+        </FormControl>
 
         <Button
-          onClick={() => {
-            console.log("Submit", { selected1, quantity });
-            onClose();
-          }}
+          onClick={handleSubmit}
           variant="contained"
           sx={buttonSx}
         >
