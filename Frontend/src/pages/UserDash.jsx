@@ -3,6 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import '../components/UserDash.module.scss';
 import styles from '../components/Sidebar.module.scss';
 import AddItemForm from '../components/ItemForm';
+import UsersItems from '../components/UsersItems';
+import AddtoInventory from '../components/AddtoInventory';
 
 const UserDash = ({ onLogout }) => {
   const { user, logout } = useAuth();
@@ -67,7 +69,14 @@ return(
     {activeTab === "items" && (
       <div>
         <h2>My Items</h2>
-        <p>You don't have any items yet!</p>
+        <button onClick={() => setActiveTab("addBelongs")}>➕ Add Items To Your Knapsack</button>
+        <UsersItems userId={user.id}/>
+      </div>
+    )}
+
+    {activeTab === "addBelongs" && (
+      <div>
+        <AddtoInventory userId={user.id} />
       </div>
     )}
   </main>

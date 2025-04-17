@@ -50,3 +50,8 @@ class Haggle(BaseModel):
     recipientItemId: str
     recipientItemQuantity: int
     status: str = "pending"
+    
+class AddBelongRequest(BaseModel):
+    userId: str
+    itemId: str
+    quantity: int

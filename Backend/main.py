@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from model import User, Todo, LoginRequest, Item
+from model import User, Todo, LoginRequest, Item, AddBelongRequest
 from database import fetch_all_listings, startup, users_collection, listings_collection, database
 from utils.security import hash_password 
 from bson import ObjectId
@@ -47,7 +47,7 @@ async def get_inventory_options(userId: str):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid userId format")
 
-    # Await this call!
+    #Await this call!
     group = await database.groups.find_one({"members": user_object_id})
     if not group:
         raise HTTPException(status_code=404, detail="No group found for this user")
@@ -66,13 +66,47 @@ async def get_inventory_options(userId: str):
         # Await item lookup
         item_doc = await database.items.find_one({"_id": item_obj_id})
         item_name = item_doc["name"] if item_doc else "Unknown Item"
+        item_description = item_doc["description"] if item_doc else "N/A"
 
         results.append({
             "_id": str(item["_id"]),
             "userId": str(item["userId"]),
             "itemId": str(item["itemId"]),
             "quantity": item.get("quantity", 1),
-            "name": item_name
+            "name": item_name,
+            "description": item_description
+        })
+
+    return results
+
+@app.get("/api/user-inventory")
+async def get_user_inventory(userId: str):
+    try:
+        user_object_id = ObjectId(userId)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid userId format")
+    # Get all itemBelongs entries for this user
+    belongs_cursor = database.itemBelongs.find({ "userId": user_object_id })
+    belongs_list = await belongs_cursor.to_list(length=None)
+
+    results = []
+
+    for entry in belongs_list:
+        item_id = entry["itemId"]
+        item_obj_id = ObjectId(item_id) if isinstance(item_id, str) else item_id
+
+        # Look up the actual item
+        item_doc = await database.items.find_one({ "_id": item_obj_id })
+        item_name = item_doc["name"] if item_doc else "Unknown Item"
+
+        results.append({
+            "_id": str(entry["_id"]),
+            "userId": str(entry["userId"]),
+            "itemId": str(entry["itemId"]),
+            "quantity": entry.get("quantity", 1),
+            "name": item_name,
+            "image": item_doc.get("image", "") if item_doc else "",
+            "relative_value": item_doc.get("relative_value", "") if item_doc else "",
         })
 
     return results
@@ -152,3 +186,14 @@ async def get_items():
     for item in items:
         item["_id"] = str(item["_id"])
     return items
+
+@app.post("/api/add-belong")
+async def add_belong(data: AddBelongRequest):
+    user_id = ObjectId(data.userId)
+    item_id = ObjectId(data.itemId)
+    result = await database["itemBelongs"].insert_one({
+        "userId": user_id,
+        "itemId": item_id,
+        "quantity": data.quantity
+    })
+    return{ "message": "Item added to user inventory", "id": str(result.inserted_id)}
