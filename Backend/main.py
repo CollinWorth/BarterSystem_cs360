@@ -128,7 +128,7 @@ async def login_user(credentials: LoginRequest):
         raise HTTPException(status_code=401, detail="Incorrect password.")
 
 
-    return {"message": "Login successful", "username": user["username"], "email": user["email"], "role": user.get("role","user")}
+    return {"message": "Login successful", "id": str(user["_id"]), "username": user["username"], "email": user["email"], "role": user.get("role","user")}
 
 @app.post("/api/promote")
 async def promote_to_admin(email: str):

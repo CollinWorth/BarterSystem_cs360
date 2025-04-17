@@ -10,8 +10,11 @@ import {
   InputLabel,
   TextField,
 } from "@mui/material";
+import { useAuth } from "../context/AuthContext"; // adjust path if needed
 
 const HagglePopup = ({ open, onClose, post }) => {
+  const { user } = useAuth(); // Get user from context
+  console.log("User in context: ", user);
   const [dropdown1Options, setDropdown1Options] = useState([]);
   const [selected1, setSelected1] = useState(""); // Ensure selected1 is a string
   const [quantity, setQuantity] = useState(1);
@@ -19,25 +22,25 @@ const HagglePopup = ({ open, onClose, post }) => {
   const [tradeQuantity, setTradeQuantity] = useState(1); // For trade item quantity
 
   useEffect(() => {
+    if (!user) return; // Don't run until user is defined
+  
     const fetchOptions = async () => {
+      if (user?.id) {
+        // safe to use it
+        console.log("User ID:", user.id);
+      }
+  
       try {
-        const res = await fetch("http://localhost:8000/api/InventoryOptions?userId=67f4a03408163838cafdd81e");
-        const contentType = res.headers.get("content-type");
-        console.log("Status:", res.status);
-        console.log("Content-Type:", contentType);
-
-        const text = await res.text(); // Get the raw text
-        console.log("Raw response text:", text);
-
+        const res = await fetch(`http://localhost:8000/api/InventoryOptions?userId=${encodeURIComponent(user.id)}`);
+        const text = await res.text();
+  
         if (!res.ok) {
           console.error(`API error (${res.status})`, text);
           throw new Error("Non-200 response");
         }
-
+  
         try {
-          const data = JSON.parse(text); // Try parsing manually
-          console.log("Parsed JSON:", data);
-
+          const data = JSON.parse(text);
           if (Array.isArray(data)) {
             setDropdown1Options(data);
           } else {
@@ -48,16 +51,15 @@ const HagglePopup = ({ open, onClose, post }) => {
           console.error("JSON parsing failed", parseErr);
           setDropdown1Options([]);
         }
-
       } catch (err) {
         console.error("Failed to fetch or process data:", err);
         setDropdown1Options([]);
       }
     };
-
+  
     fetchOptions();
-  }, []);
-
+  }, [user]);
+  
   const handleDropdown1Change = (e) => setSelected1(e.target.value.toString()); // Ensure selected1 is a string
   const handleQuantityChange = (e) => setQuantity(e.target.value);
   const handleTradeItemChange = (e) => setTradeItem(e.target.value); // Handle trade item
