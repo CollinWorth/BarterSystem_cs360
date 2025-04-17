@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from model import User, Todo, LoginRequest, Item, AddBelongRequest
+from model import User, Todo, LoginRequest, Item, AddBelongRequest, TradeListing
 from database import fetch_all_listings, startup, users_collection, listings_collection, database
 from utils.security import hash_password 
 from bson import ObjectId
@@ -197,3 +197,59 @@ async def add_belong(data: AddBelongRequest):
         "quantity": data.quantity
     })
     return{ "message": "Item added to user inventory", "id": str(result.inserted_id)}
+
+@app.post("/api/trade-listing")
+async def create_trade_listing(listing: TradeListing):
+    try:
+        # Validate & convert IDs
+        listing_dict = {
+            "userId": ObjectId(listing.userId),
+            "offered_item_id": ObjectId(listing.offered_item_id),
+            "offered_quantity": listing.offered_quantity,
+            "requested_item_id": ObjectId(listing.requested_item_id),
+            "requested_quantity": listing.requested_quantity,
+            "post_status": listing.post_status
+        }
+
+        result = await database["currentListings"].insert_one(listing_dict)
+        return {"message": "Listing created", "id": str(result.inserted_id)}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.get("/api/user-listings")
+async def get_user_listings(userId: str):
+    try:
+        user_object_id = ObjectId(userId)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid userId format")
+
+    listings = await database["currentListings"].find({
+        "userId": user_object_id
+    }).to_list(length=100)
+
+    results = []
+
+    for listing in listings:
+        offered_item_id = listing.get("offered_item_id")
+        requested_item_id = listing.get("requested_item_id")
+
+        # Lookup item names from items collection
+        offered_item = await database["items"].find_one({"_id": ObjectId(offered_item_id)})
+        requested_item = await database["items"].find_one({"_id": ObjectId(requested_item_id)})
+
+        offered_name = offered_item.get("name", "Unknown") if offered_item else "Unknown"
+        requested_name = requested_item.get("name", "Unknown") if requested_item else "Unknown"
+
+        results.append({
+            "_id": str(listing["_id"]),
+            "userId": str(listing["userId"]),
+            "offered_item_id": str(offered_item_id),
+            "offered_item_name": str(offered_name),  # ✅ include readable name
+            "offered_quantity": listing["offered_quantity"],
+            "requested_item_id": str(requested_item_id),
+            "requested_item_name": str(requested_name),  # ✅ include readable name
+            "requested_quantity": listing["requested_quantity"],
+            "post_status": listing.get("post_status", "unknown")
+        })
+
+    return results

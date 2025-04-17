@@ -7,6 +7,8 @@ class Listing(BaseModel):
 	photo: str
 	quantity: int
 	user: str
+ 
+ 
 class Todo(BaseModel):
 	nanoid: str
 	title: str
@@ -55,3 +57,11 @@ class AddBelongRequest(BaseModel):
     userId: str
     itemId: str
     quantity: int
+    
+class TradeListing(BaseModel):
+    userId: str
+    offered_item_id: str
+    offered_quantity: int
+    requested_item_id: str
+    requested_quantity: int
+    post_status:str

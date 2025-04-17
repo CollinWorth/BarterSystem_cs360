@@ -1,0 +1,51 @@
+.itemCardContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    width: 100%;
+  }
+  
+  .itemCard {
+    background-color: #1c1c1e; /* dark gray card to contrast with black bg */
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 900px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-gap: 2rem;
+    align-items: center;
+    color: #f1f1f1; /* readable text color */
+    box-shadow: 0 12px 28px rgba(158, 106, 43, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .itemCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(255, 227, 45, 0.356);
+  }
+  
+  .button {
+    background-color: #f7c518;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .button:hover {
+    background-color: #ddb10f;
+  }
+  
+  img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 12px;
+    object-fit: cover;
+  }
