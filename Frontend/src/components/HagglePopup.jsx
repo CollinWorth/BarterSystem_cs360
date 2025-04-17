@@ -16,10 +16,11 @@ const HagglePopup = ({ open, onClose, post }) => {
   const { user } = useAuth(); // Get user from context
   console.log("User in context: ", user);
   const [dropdown1Options, setDropdown1Options] = useState([]);
-  const [selected1, setSelected1] = useState(""); // Ensure selected1 is a string
+  const [selectedItem, setselectedItem] = useState(""); // Ensure selectedItem is a string
   const [quantity, setQuantity] = useState(1);
   const [tradeItem, setTradeItem] = useState(""); // For trade item selection
   const [tradeQuantity, setTradeQuantity] = useState(1); // For trade item quantity
+  const listingOwnerId = post?.userId;
 
   useEffect(() => {
     if (!user) return; // Don't run until user is defined
@@ -34,11 +35,7 @@ const HagglePopup = ({ open, onClose, post }) => {
         const res = await fetch(`http://localhost:8000/api/InventoryOptions?userId=${encodeURIComponent(user.id)}`);
         const text = await res.text();
   
-        if (!res.ok) {
-          console.error(`API error (${res.status})`, text);
-          throw new Error("Non-200 response");
-        }
-  
+      
         try {
           const data = JSON.parse(text);
           if (Array.isArray(data)) {
@@ -59,8 +56,15 @@ const HagglePopup = ({ open, onClose, post }) => {
   
     fetchOptions();
   }, [user]);
+
+  useEffect(() => {
+    if (post?.requested_item_id) {
+      setTradeItem(post.requested_item_id);
+      setTradeQuantity(post.requested_quantity || 1);
+    }
+  }, [post]);
   
-  const handleDropdown1Change = (e) => setSelected1(e.target.value.toString()); // Ensure selected1 is a string
+  const handleDropdown1Change = (e) => setselectedItem(e.target.value.toString()); // Ensure selectedItem is a string
   const handleQuantityChange = (e) => setQuantity(e.target.value);
   const handleTradeItemChange = (e) => setTradeItem(e.target.value); // Handle trade item
   const handleTradeQuantityChange = (e) => setTradeQuantity(e.target.value); // Handle trade quantity
@@ -108,13 +112,17 @@ const HagglePopup = ({ open, onClose, post }) => {
 
   const handleSubmit = async () => {
     const requestData = {
-      selected1,
-      quantity,
-      tradeItem,
-      tradeQuantity,
+      senderId: user.id,                         // You
+      recipientId: listingOwnerId,               // Person who made the listing
+      senderItemId: selectedItem,                // Your selected inventory item (from dropdown)
+      senderItemQuantity: quantity,
+      recipientItemId: post.offered_item_id,              // Item in the listing (you want this)
+      recipientItemQuantity: tradeQuantity,
     };
+  
     console.log("Sending request data:", requestData);
-    // Send data to your API
+    console.log("Sending request:", JSON.stringify(requestData, null, 2));
+  
     try {
       const response = await fetch("http://localhost:8000/api/submit-haggle", {
         method: "POST",
@@ -163,7 +171,7 @@ const HagglePopup = ({ open, onClose, post }) => {
             Choose Inventory Item
           </InputLabel>
           <Select
-            value={selected1}
+            value={selectedItem}
             onChange={handleDropdown1Change}
             sx={{
               color: "#f7c518",

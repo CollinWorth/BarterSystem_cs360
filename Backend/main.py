@@ -1,12 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
-from model import User, Todo, LoginRequest, Item, AddBelongRequest, TradeListing
+from model import User, Haggle, LoginRequest, Item, AddBelongRequest, TradeListing
 from database import  startup, users_collection, listings_collection, database
 from utils.security import hash_password 
-from bson import ObjectId
+from bson import ObjectId, errors
 from utils.security import verify_password
 from fastapi.responses import JSONResponse
 from fastapi import Query
+from motor.motor_asyncio import AsyncIOMotorClient
+
 
 
 origins = [
@@ -28,10 +30,6 @@ app.add_middleware(
 @app.on_event("startup")
 async def on_startup():
     await startup()  # This will check the MongoDB connection at startup
-
-@app.get('/')
-def get_root():
-    return {"Ping": "Pong"}
 
 
 @app.get("/api/get-listings")
@@ -287,3 +285,108 @@ async def get_user_listings(userId: str):
         })
 
     return results
+
+
+    ################## Haggle Routes ##################
+
+
+
+def is_valid_objectid(oid: str) -> bool:
+    try:
+        ObjectId(oid)
+        return True
+    except (errors.InvalidId, TypeError):
+        return False
+
+@app.post("/api/submit-haggle")
+async def create_haggle(haggle: Haggle):
+    haggle_dict = haggle.dict()
+    try:
+        result = await database["haggles"].insert_one(haggle_dict)
+        return {"message": "Haggle request submitted", "id": str(result.inserted_id)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Haggle creation failed: {str(e)}")
+
+@app.post("/api/finalize-trade")
+async def finalize_trade(
+    senderId: str = Body(...),
+    recipientId: str = Body(...),
+    senderItemId: str = Body(...),
+    senderItemQuantity: int = Body(...),
+    recipientItemId: str = Body(...),
+    recipientItemQuantity: int = Body(...)
+):
+    try:
+        sender_obj = ObjectId(senderId)
+        recipient_obj = ObjectId(recipientId)
+
+        # Reduce sender's inventory
+        await database.itemBelongs.update_one(
+            {"userId": sender_obj, "itemId": ObjectId(senderItemId)},
+            {"$inc": {"quantity": -senderItemQuantity}}
+        )
+        await database.itemBelongs.update_one(
+            {"userId": recipient_obj, "itemId": ObjectId(senderItemId)},
+            {"$inc": {"quantity": senderItemQuantity}},
+            upsert=True
+        )
+
+        # Reduce recipient's inventory
+        await database.itemBelongs.update_one(
+            {"userId": recipient_obj, "itemId": ObjectId(recipientItemId)},
+            {"$inc": {"quantity": -recipientItemQuantity}}
+        )
+        await database.itemBelongs.update_one(
+            {"userId": sender_obj, "itemId": ObjectId(recipientItemId)},
+            {"$inc": {"quantity": recipientItemQuantity}},
+            upsert=True
+        )
+
+        return {"message": "Trade finalized successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Trade failed: {str(e)}")
+
+@app.get("/api/current-haggles")
+async def get_current_haggles(userId: str):
+    try:
+        ObjectId(userId)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid userId format")
+
+    # Only fetch haggles where the user is the recipient
+    cursor = database["haggles"].find({
+        "recipientId": userId
+    })
+
+    haggles = await cursor.to_list(length=None)
+
+    enriched = []
+    for haggle in haggles:
+        sender_item_name = "Unknown"
+        recipient_item_name = "Unknown"
+
+        if is_valid_objectid(haggle["senderItemId"]):
+            sender_item = await database["items"].find_one({"_id": ObjectId(haggle["senderItemId"])})
+            if sender_item:
+                sender_item_name = sender_item["name"]
+
+        if is_valid_objectid(haggle["recipientItemId"]):
+            recipient_item = await database["items"].find_one({"_id": ObjectId(haggle["recipientItemId"])})
+            if recipient_item:
+                recipient_item_name = recipient_item["name"]
+
+        enriched.append({
+            "id": str(haggle["_id"]),
+            "senderId": haggle["senderId"],
+            "recipientId": haggle["recipientId"],
+            "senderItemId": haggle["senderItemId"],
+            "senderItemName": sender_item_name,
+            "senderItemQuantity": haggle["senderItemQuantity"],
+            "recipientItemId": haggle["recipientItemId"],
+            "recipientItemName": recipient_item_name,
+            "recipientItemQuantity": haggle["recipientItemQuantity"],
+            "status": haggle.get("status", "pending")
+        })
+
+    return enriched
+ ####################### End of Haggle Routes ##################

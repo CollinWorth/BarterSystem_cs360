@@ -7,6 +7,7 @@ import UsersItems from '../components/UsersItems';
 import AddtoInventory from '../components/AddtoInventory';
 import AddUserPost from '../components/AddUserPost';
 import UserPosts from '../components/UserPosts';
+import CurrentHaggles from '../components/CurrentHaggles';
 
 const UserDash = ({ onLogout }) => {
   const { user, logout } = useAuth();
@@ -36,6 +37,11 @@ return(
           </li>)}
         <li><a onClick={() => setActiveTab("posts")}>My Posts</a></li>
         <li><a onClick={() => setActiveTab("items")}>My Items</a></li>
+        <li><a onClick={() => setActiveTab("haggles")}>Current Haggles</a></li>
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
         <li><a onClick={handleLogout}>Logout</a></li>
       </ul>
     </div>
@@ -86,6 +92,12 @@ return(
     {activeTab === "addPost" && (
       <div>
         <AddUserPost userId={user.id}/>
+      </div>
+    )}
+
+    {activeTab === "haggles" && (
+      <div>
+        <CurrentHaggles userId={user.id} />
       </div>
     )}
 
