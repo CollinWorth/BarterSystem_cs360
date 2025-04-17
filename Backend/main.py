@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from model import User, Haggle, LoginRequest, Item, AddBelongRequest, TradeListing
-from database import  startup, users_collection, listings_collection, database
+from database import  startup, users_collection, listings_collection, database, haggles_collection, item_belongs_collection, items_collection 
 from utils.security import hash_password 
 from bson import ObjectId, errors
 from utils.security import verify_password
@@ -309,42 +309,69 @@ async def create_haggle(haggle: Haggle):
 
 @app.post("/api/finalize-trade")
 async def finalize_trade(
-    senderId: str = Body(...),
-    recipientId: str = Body(...),
-    senderItemId: str = Body(...),
-    senderItemQuantity: int = Body(...),
-    recipientItemId: str = Body(...),
-    recipientItemQuantity: int = Body(...)
+    haggleId: str = Body(...),
 ):
     try:
-        sender_obj = ObjectId(senderId)
-        recipient_obj = ObjectId(recipientId)
+        haggle = await database["haggles"].find_one({"_id": ObjectId(haggleId)})
+        if not haggle:
+            raise HTTPException(status_code=404, detail="Haggle not found")
 
-        # Reduce sender's inventory
+        if haggle["status"] != "pending":
+            raise HTTPException(status_code=400, detail="Haggle has already been processed")
+
+        sender_obj = ObjectId(haggle["senderId"])
+        recipient_obj = ObjectId(haggle["recipientId"])
+
+        # Optional: Validate sender and recipient have enough quantity
+        sender_item = await database["itemBelongs"].find_one({
+            "userId": sender_obj,
+            "itemId": ObjectId(haggle["senderItemId"])
+        })
+        recipient_item = await database["itemBelongs"].find_one({
+            "userId": recipient_obj,
+            "itemId": ObjectId(haggle["recipientItemId"])
+        })
+
+        if not sender_item or sender_item["quantity"] < haggle["senderItemQuantity"]:
+            raise HTTPException(status_code=400, detail="Sender has insufficient quantity")
+
+        if not recipient_item or recipient_item["quantity"] < haggle["recipientItemQuantity"]:
+            raise HTTPException(status_code=400, detail="Recipient has insufficient quantity")
+
+        # Execute trade
         await database.itemBelongs.update_one(
-            {"userId": sender_obj, "itemId": ObjectId(senderItemId)},
-            {"$inc": {"quantity": -senderItemQuantity}}
+            {"userId": sender_obj, "itemId": ObjectId(haggle["senderItemId"])},
+            {"$inc": {"quantity": -haggle["senderItemQuantity"]}}
         )
         await database.itemBelongs.update_one(
-            {"userId": recipient_obj, "itemId": ObjectId(senderItemId)},
-            {"$inc": {"quantity": senderItemQuantity}},
+            {"userId": recipient_obj, "itemId": ObjectId(haggle["senderItemId"])},
+            {"$inc": {"quantity": haggle["senderItemQuantity"]}},
             upsert=True
         )
 
-        # Reduce recipient's inventory
         await database.itemBelongs.update_one(
-            {"userId": recipient_obj, "itemId": ObjectId(recipientItemId)},
-            {"$inc": {"quantity": -recipientItemQuantity}}
+            {"userId": recipient_obj, "itemId": ObjectId(haggle["recipientItemId"])},
+            {"$inc": {"quantity": -haggle["recipientItemQuantity"]}}
         )
         await database.itemBelongs.update_one(
-            {"userId": sender_obj, "itemId": ObjectId(recipientItemId)},
-            {"$inc": {"quantity": recipientItemQuantity}},
+            {"userId": sender_obj, "itemId": ObjectId(haggle["recipientItemId"])},
+            {"$inc": {"quantity": haggle["recipientItemQuantity"]}},
             upsert=True
         )
 
-        return {"message": "Trade finalized successfully"}
+        # Update haggle status to "approved"
+        await database["haggles"].update_one(
+            {"_id": ObjectId(haggleId)},
+            {"$set": {"status": "approved"}}
+        )
+
+        return {"message": "Trade finalized and approved successfully"}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Trade failed: {str(e)}")
+
+
+
 
 @app.get("/api/current-haggles")
 async def get_current_haggles(userId: str):
