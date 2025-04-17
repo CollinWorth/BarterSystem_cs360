@@ -353,9 +353,12 @@ async def get_current_haggles(userId: str):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid userId format")
 
-    # Only fetch haggles where the user is the recipient
+    # Fetch haggles where the user is either the sender OR the recipient
     cursor = database["haggles"].find({
-        "recipientId": userId
+        "$or": [
+            {"senderId": userId},
+            {"recipientId": userId}
+        ]
     })
 
     haggles = await cursor.to_list(length=None)
