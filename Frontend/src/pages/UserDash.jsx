@@ -8,7 +8,7 @@ import AddtoInventory from '../components/AddtoInventory';
 
 const UserDash = ({ onLogout }) => {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState("settings");
+  const [activeTab, setActiveTab] = useState("barters");
   console.log("User in context: ", user);
   const handleLogout = () =>{
     logout();
@@ -32,7 +32,7 @@ return(
             <li><a onClick={() => setActiveTab("manageUsers")}>👥 Manage Users</a></li>
           </ul>
           </li>)}
-        <li><a onClick={() => setActiveTab("settings")}>User Settings</a></li>
+        <li><a onClick={() => setActiveTab("barters")}>Barters</a></li>
         <li><a onClick={() => setActiveTab("items")}>My Items</a></li>
         <li><a onClick={handleLogout}>Logout</a></li>
       </ul>
@@ -59,9 +59,9 @@ return(
       </div>
     )}
 
-    {activeTab === "settings" && (
+    {activeTab === "barters" && (
       <div>
-        <h2>User Settings</h2>
+        <h2>Active barters</h2>
         <p>Update email, password, etc.</p>
       </div>
     )}
