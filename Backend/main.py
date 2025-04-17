@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from model import User, Todo, LoginRequest, Item, AddBelongRequest, TradeListing
-from database import fetch_all_listings, startup, users_collection, listings_collection, database
+from database import  startup, users_collection, listings_collection, database
 from utils.security import hash_password 
 from bson import ObjectId
 from utils.security import verify_password
@@ -36,8 +36,38 @@ def get_root():
 
 @app.get("/api/get-listings")
 async def get_listings():
-    currentListings = await fetch_all_listings()
-    if not currentListings: raise HTTPException(404)
+    currentListings = []
+    cursor = listings_collection.find()
+
+    async for doc in cursor:
+        doc["_id"] = str(doc["_id"])
+        doc["userId"] = str(doc["userId"])
+        doc["offered_item_id"] = str(doc["offered_item_id"])
+        doc["requested_item_id"] = str(doc["requested_item_id"])
+
+        # Fetch item details
+        offered_item = await database.items.find_one({"_id": ObjectId(doc["offered_item_id"])})
+        requested_item = await database.items.find_one({"_id": ObjectId(doc["requested_item_id"])})
+
+        # Add readable fields for frontend
+        doc["offered_item_details"] = {
+            "name": offered_item.get("name", "Unknown Item"),
+            "description": offered_item.get("description", "N/A"),
+            "photo": offered_item.get("image", "")  
+        } if offered_item else {}
+
+        doc["requested_item_details"] = {
+            "name": requested_item.get("name", "Unknown Item"),
+            "description": requested_item.get("description", "N/A"),
+            "photo": requested_item.get("image", "")  
+        } if requested_item else {}
+
+        currentListings.append(doc)
+
+    if not currentListings:
+        raise HTTPException(status_code=404, detail="No listings found")
+
+    print(f"Fetched {len(currentListings)} listings")
     return currentListings
 
 @app.get("/api/InventoryOptions")
@@ -47,14 +77,18 @@ async def get_inventory_options(userId: str):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid userId format")
 
-    #Await this call!
+    # Try to find a group that includes the user
     group = await database.groups.find_one({"members": user_object_id})
-    if not group:
-        raise HTTPException(status_code=404, detail="No group found for this user")
 
-    # Await the cursor, turn to list
+    # Determine which userIds to search for
+    if group:
+        user_ids_to_check = group["members"]
+    else:
+        user_ids_to_check = [user_object_id]
+
+    # Find itemBelongs for the user or group members
     item_belongs_cursor = database.itemBelongs.find({
-        "userId": {"$in": group["members"]}
+        "userId": {"$in": user_ids_to_check}
     })
     item_belongs = await item_belongs_cursor.to_list(length=None)
 
@@ -63,7 +97,7 @@ async def get_inventory_options(userId: str):
         item_id = item["itemId"]
         item_obj_id = ObjectId(item_id) if isinstance(item_id, str) else item_id
 
-        # Await item lookup
+        # Lookup item details
         item_doc = await database.items.find_one({"_id": item_obj_id})
         item_name = item_doc["name"] if item_doc else "Unknown Item"
         item_description = item_doc["description"] if item_doc else "N/A"

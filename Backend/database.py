@@ -31,14 +31,6 @@ async def check_mongo_connection():
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
 
-# Fetch all listings
-async def fetch_all_listings():
-    currentListings = []
-    cursor = listings_collection.find()
-    async for doc in cursor:
-        currentListings.append(Listing(**doc))
-    print(f"Fetched {len(currentListings)} listings")
-    return currentListings
 
 # Call the MongoDB connection check here
 async def startup():
