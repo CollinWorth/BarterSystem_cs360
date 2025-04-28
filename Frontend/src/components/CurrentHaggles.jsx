@@ -63,6 +63,41 @@ const CurrentHaggles = ({ userId }) => {
     }
   };
 
+  // Item value comp start
+  const calculateDealValue = (haggle, isSender) => {
+    const senderTotalValue = haggle.senderItemQuantity * (haggle.senderItemRelativeValue ?? 0);
+    const recipientTotalValue = haggle.recipientItemQuantity * (haggle.recipientItemRelativeValue ?? 0);
+  
+    if (isSender) {
+      if (recipientTotalValue > senderTotalValue) {
+        console.log("Recipient total",recipientTotalValue); 
+        return "Good Deal!";
+        }
+      else if (recipientTotalValue < senderTotalValue) {
+        return "Bad Deal";
+      }
+      return "Even Trade";
+    } else {
+      if (senderTotalValue > recipientTotalValue) return "Good Deal!";
+      if (senderTotalValue < recipientTotalValue) return "Bad Deal";
+      return "Even Trade";
+    }
+  };
+
+  const getDealClass = (dealQuality) => {
+    switch (dealQuality) {
+      case "Good Deal!":
+        return styles.goodDeal;
+      case "Bad Deal":
+        return styles.badDeal;
+      case "Even Trade":
+        return styles.evenDeal;
+      default:
+        return "";
+    }
+  };
+
+
   const uid = String(userId);
   const sentHaggles = haggles.filter(h => String(h.senderId) === uid);
   const receivedHaggles = haggles.filter(h => String(h.recipientId) === uid);
@@ -78,7 +113,9 @@ const CurrentHaggles = ({ userId }) => {
           <p className={styles.emptyMessage}>You haven’t sent any haggles.</p>
         ) : (
           <ul>
-            {sentHaggles.map(h => (
+            {sentHaggles.map(h => {
+              const dealQuality = calculateDealValue(h,true);
+              return(
               <li key={h.id} className={styles.haggleCard}>
                 <div className={styles.haggleDetails}>
                   <div>
@@ -88,9 +125,13 @@ const CurrentHaggles = ({ userId }) => {
                     <strong>Your Request:</strong> {h.recipientItemQuantity} of {h.recipientItemName}
                   </div>
                 </div>
-                <div className={styles.haggleStatus}>{h.status}</div>
+                <div className={styles.haggleLabels}>
+                  <div className={styles.haggleStatus}>{h.status}</div>
+                  <div className={`${styles.dealStatus} ${getDealClass(dealQuality)}`}>{dealQuality}</div>
+                </div>
               </li>
-            ))}
+            );
+            })}
           </ul>
         )}
       </div>
@@ -102,7 +143,10 @@ const CurrentHaggles = ({ userId }) => {
           <p className={styles.emptyMessage}>You haven’t received any haggles.</p>
         ) : (
           <ul>
-            {receivedHaggles.map(h => (
+            {receivedHaggles.map(h => {
+              const dealQuality = calculateDealValue(h,false);
+              return(
+              
               <li key={h.id} className={styles.haggleCard}>
                 <div className={styles.haggleDetails}>
                   <div>
@@ -112,7 +156,10 @@ const CurrentHaggles = ({ userId }) => {
                     <strong>Sender Request:</strong> {h.recipientItemQuantity} of {h.recipientItemName}
                   </div>
                 </div>
-                <div className={styles.haggleStatus}>{h.status}</div>
+                <div className={styles.haggleLabels}>
+                  <div className={styles.haggleStatus}>{h.status}</div>
+                  <div className={`${styles.dealStatus} ${getDealClass(dealQuality)}`}>{dealQuality}</div>
+                </div>
                 {h.status === "pending" && (
                   <div className={styles.buttonGroup}>
                     <button onClick={() => handleDecision(h.id, "approved")} className={styles.approve}>Approve</button>
@@ -120,7 +167,8 @@ const CurrentHaggles = ({ userId }) => {
                   </div>
                 )}
               </li>
-            ))}
+            );
+          })}
           </ul>
         )}
       </div>

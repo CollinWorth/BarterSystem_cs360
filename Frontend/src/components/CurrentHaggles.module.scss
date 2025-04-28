@@ -59,3 +59,43 @@
     color: #aaa;
     font-size: 1.1rem;
   }
+
+  .haggleStatus, .dealStatus {
+    min-width: 80px;  /* or whatever looks best */
+    text-align: center;
+  }
+
+  .dealStatus {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    text-transform: capitalize;
+  }
+  
+  .goodDeal {
+    background-color: #28a745; // green
+    color: white;
+  }
+  
+  .badDeal {
+    background-color: #dc3545; // red
+    color: white;
+  }
+  
+  .evenDeal {
+    background-color: #6c757d; // gray
+    color: white;
+  }
+
+  .haggleLabels {
+    display: flex;
+    flex-direction: column;   /* <--- this is key */
+    align-items: center;       /* center horizontally */
+    justify-content: center;   /* center vertically (if needed) */
+    gap: 5px;                  /* small gap between pending and Good Deal */
+    margin-top: 10px;
+  }
+
