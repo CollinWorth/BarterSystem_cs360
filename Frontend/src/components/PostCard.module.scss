@@ -7,17 +7,18 @@
 }
 
 .postCard {
-  background-color: #1c1c1e; /* dark gray card to contrast with black bg */
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Equal columns */
+  gap: 1.5rem;
+
+  background-color: #1c1c1e;
   border: 1px solid #333;
-  border-radius: 16px;
-  padding: 2rem;
+  border-radius: 1rem;
+  padding: 1.5rem;
   max-width: 900px;
   width: 100%;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-gap: 2rem;
-  align-items: center;
-  color: #f1f1f1; /* readable text color */
+  align-items: start;
+  color: #f1f1f1;
   box-shadow: 0 12px 28px rgba(158, 106, 43, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -28,6 +29,8 @@
 }
 
 .button {
+  display: flex;
+  justify-content: center;
   background-color: #f7c518;
   color: #000;
   font-weight: bold;
@@ -36,6 +39,7 @@
   padding: 0.75rem 1.25rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  width: 100%; /* Makes it take full width of its container */
 }
 
 .button:hover {
@@ -48,4 +52,14 @@ img {
   height: auto;
   border-radius: 12px;
   object-fit: cover;
+  outline: 2px solid #ddb10f
+}
+
+.actionSection {
+  grid-column: span 2;
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-left: 15rem;
+  margin-right: 15rem;
 }
