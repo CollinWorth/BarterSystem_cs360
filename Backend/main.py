@@ -478,4 +478,20 @@ async def get_current_haggles(userId: str):
         })
 
     return enriched
+
+@app.delete("/api/delete-haggle/{haggleId}")
+async def delete_haggle(haggleId: str):
+    try:
+        # Validate the haggleId
+        haggle_object_id = ObjectId(haggleId)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid haggleId format")
+
+    # Attempt to delete the haggle
+    result = await database["haggles"].delete_one({"_id": haggle_object_id})
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Haggle not found")
+
+    return {"message": "Haggle deleted successfully"}
  ####################### End of Haggle Routes ##################

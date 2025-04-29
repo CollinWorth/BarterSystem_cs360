@@ -1,0 +1,108 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #1c1c1e; /* Dark background for contrast */
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  max-width: 600px;
+  margin: 2rem auto;
+  color: #f9f9f9; /* Bright text for readability */
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #f7c518; /* Highlighted title color */
+  text-align: center;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Spacing between form elements */
+}
+
+.input {
+  width: 100%; /* Ensure all inputs take up the full width of the form */
+  padding: 0.75rem 1rem;
+  border: 1px solid #444; /* Subtle border */
+  border-radius: 8px;
+  background-color: #2c2c2e; /* Slightly lighter background for inputs */
+  color: #f9f9f9;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+.input[type="number"] {
+  -moz-appearance: textfield; /* Remove spinner buttons in Firefox */
+  appearance: textfield; /* Remove spinner buttons in other browsers */
+}
+
+.input:focus {
+  border-color: #f7c518; /* Highlight border on focus */
+  outline: none;
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #2c2c2e;
+  color: #f9f9f9;
+  font-size: 1rem;
+  resize: vertical; /* Allow vertical resizing */
+  min-height: 120px;
+  transition: border-color 0.3s ease;
+}
+
+.textarea:focus {
+  border-color: #f7c518;
+  outline: none;
+}
+
+.button {
+  background-color: #f7c518;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  text-align: center;
+}
+
+.button:hover {
+  background-color: #ddb10f;
+  transform: scale(1.05); /* Slight scaling effect on hover */
+}
+
+.button:disabled {
+  background-color: #888;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .form {
+    gap: 1rem;
+  }
+
+  .button {
+    padding: 0.5rem 1rem;
+  }
+}

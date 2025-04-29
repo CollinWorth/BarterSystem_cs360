@@ -24,19 +24,20 @@ const CurrentHaggles = ({ userId }) => {
   }, [userId]);
 
   const handleApprove = async (haggleId) => {
+    console.log("Approving haggle with ID:", haggleId); // Debugging log
     try {
       const res = await fetch("http://localhost:8000/api/finalize-trade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ haggleId }),
+        body: JSON.stringify({ haggleId: String(haggleId) }),
       });
-
+  
       if (res.ok) {
         fetchHaggles();
       } else {
         const error = await res.json();
         console.error("Failed to approve haggle:", error.detail);
-        alert("Quantity of product no longer availible.");
+        alert("Quantity of product no longer available.");
       }
     } catch (err) {
       console.error("Error approving haggle:", err);
@@ -89,8 +90,13 @@ const CurrentHaggles = ({ userId }) => {
   };
 
   const uid = String(userId);
-  const sentHaggles = haggles.filter(h => String(h.senderId) === uid);
-  const receivedHaggles = haggles.filter(h => String(h.recipientId) === uid);
+
+  const sentHaggles = haggles.filter(
+    h => String(h.senderId) === uid && h.status !== "approved"
+  );
+  const receivedHaggles = haggles.filter(
+    h => String(h.recipientId) === uid && h.status !== "approved"
+  );
 
   return (
     <div className={styles.currentHagglesContainer}>
@@ -139,10 +145,10 @@ const CurrentHaggles = ({ userId }) => {
                 <li key={h.id} className={styles.haggleCard}>
                   <div className={styles.haggleDetails}>
                     <div>
-                      <strong>Sender Offer:</strong> {h.senderItemQuantity} of {h.senderItemName}
+                      <strong>Their Offer:</strong> {h.senderItemQuantity} of {h.senderItemName}
                     </div>
                     <div>
-                      <strong>Sender Request:</strong> {h.recipientItemQuantity} of {h.recipientItemName}
+                      <strong>Their Request:</strong> {h.recipientItemQuantity} of {h.recipientItemName}
                     </div>
                   </div>
                   <div className={styles.haggleLabels}>
@@ -155,6 +161,35 @@ const CurrentHaggles = ({ userId }) => {
                       <button onClick={() => handleReject(h.id)} className={styles.reject}>Reject</button>
                     </div>
                   )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      {/* Approved Haggles */}
+      <div className={styles.section}>
+        <h3>Approved Haggles</h3>
+        {haggles.filter(h => h.status === "approved").length === 0 ? (
+          <p className={styles.emptyMessage}>You don’t have any approved haggles.</p>
+        ) : (
+          <ul>
+            {haggles.filter(h => h.status === "approved").map(h => {
+              const isSender = String(h.senderId) === uid; // Check if the user is the sender
+              return (
+                <li key={h.id} className={styles.haggleCard}>
+                  <div className={styles.haggleDetails}>
+                    <div>
+                      <strong>{isSender ? "You Sent:" : "You Got:"}</strong> {isSender ? h.senderItemQuantity : h.recipientItemQuantity} of {isSender ? h.senderItemName : h.recipientItemName}
+                    </div>
+                    <div>
+                      <strong>{isSender ? "You Got:" : "You Sent:"}</strong> {isSender ? h.recipientItemQuantity : h.senderItemQuantity} of {isSender ? h.recipientItemName : h.senderItemName}
+                    </div>
+                  </div>
+                  <div className={styles.haggleLabels}>
+                    <div className={styles.haggleStatus}>Approved</div>
+                  </div>
                 </li>
               );
             })}
