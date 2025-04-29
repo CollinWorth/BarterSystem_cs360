@@ -9,8 +9,6 @@ from fastapi.responses import JSONResponse
 from fastapi import Query
 from motor.motor_asyncio import AsyncIOMotorClient
 
-
-
 origins = [
     "http://localhost:3000",  # Allow React app on localhost:3000
     "http://127.0.0.1:3000",  # Allow React app on 127.0.0.1:3000
@@ -97,6 +95,21 @@ async def get_item_name(id: str = Query(..., alias="id")):
 
     return item["name"] 
 
+@app.delete("/api/delete-item/{itemBelongsId}")
+async def delete_item(itemBelongsId: str):
+    try:
+        # Validate the itemBelongsId
+        item_belongs_object_id = ObjectId(itemBelongsId)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid itemBelongsId format")
+
+    # Attempt to delete the item from the user's inventory
+    result = await database["itemBelongs"].delete_one({"_id": item_belongs_object_id})
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Item not found in user's inventory")
+
+    return {"message": "Item deleted successfully"}
 
 #####################Inventory Routes
 
@@ -325,17 +338,25 @@ async def finalize_trade(
     haggleId: str = Body(...),
 ):
     try:
+        print(f"Starting trade finalization for haggleId: {haggleId}")
+
         haggle = await database["haggles"].find_one({"_id": ObjectId(haggleId)})
         if not haggle:
+            print(f"Haggle not found for haggleId: {haggleId}")
             raise HTTPException(status_code=404, detail="Haggle not found")
 
+        print(f"Haggle details: {haggle}")
+
         if haggle["status"] != "pending":
+            print(f"Haggle already processed. Status: {haggle['status']}")
             raise HTTPException(status_code=400, detail="Haggle has already been processed")
 
         sender_obj = ObjectId(haggle["senderId"])
         recipient_obj = ObjectId(haggle["recipientId"])
 
-        # Optional: Validate sender and recipient have enough quantity
+        print(f"Sender ID: {sender_obj}, Recipient ID: {recipient_obj}")
+
+        # Validate sender and recipient have enough quantity
         sender_item = await database["itemBelongs"].find_one({
             "userId": sender_obj,
             "itemId": ObjectId(haggle["senderItemId"])
@@ -345,13 +366,19 @@ async def finalize_trade(
             "itemId": ObjectId(haggle["recipientItemId"])
         })
 
+        print(f"Sender item details: {sender_item}")
+        print(f"Recipient item details: {recipient_item}")
+
         if not sender_item or sender_item["quantity"] < haggle["senderItemQuantity"]:
+            print(f"Sender has insufficient quantity. Required: {haggle['senderItemQuantity']}, Available: {sender_item['quantity'] if sender_item else 'None'}")
             raise HTTPException(status_code=400, detail="Sender has insufficient quantity")
 
         if not recipient_item or recipient_item["quantity"] < haggle["recipientItemQuantity"]:
+            print(f"Recipient has insufficient quantity. Required: {haggle['recipientItemQuantity']}, Available: {recipient_item['quantity'] if recipient_item else 'None'}")
             raise HTTPException(status_code=400, detail="Recipient has insufficient quantity")
 
         # Execute trade
+        print("Executing trade...")
         await database.itemBelongs.update_one(
             {"userId": sender_obj, "itemId": ObjectId(haggle["senderItemId"])},
             {"$inc": {"quantity": -haggle["senderItemQuantity"]}}
@@ -378,9 +405,11 @@ async def finalize_trade(
             {"$set": {"status": "approved"}}
         )
 
+        print(f"Trade finalized successfully for haggleId: {haggleId}")
         return {"message": "Trade finalized and approved successfully"}
 
     except Exception as e:
+        print(f"Trade finalization failed for haggleId: {haggleId}. Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Trade failed: {str(e)}")
 
 
