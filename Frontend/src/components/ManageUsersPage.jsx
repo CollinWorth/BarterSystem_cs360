@@ -15,7 +15,14 @@ const ManageUsersPage = () => {
           throw new Error("Failed to fetch users");
         }
         const data = await res.json();
-        setUsers(data);
+
+        // Ensure all user IDs are strings
+        const formattedData = data.map((user) => ({
+          ...user,
+          id: user._id.toString(), // Convert _id to string if necessary
+        }));
+
+        setUsers(formattedData);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -46,18 +53,25 @@ const ManageUsersPage = () => {
   // Modify user role
   const handleModifyRole = async (userId, newRole) => {
     try {
+      // Ensure the role is converted to lowercase before sending
+      const role = newRole.toLowerCase();
+
       const res = await fetch(`http://localhost:8000/api/users/${userId}/role`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole }),
+        body: JSON.stringify({ role }), // Send the role in lowercase
       });
+
       if (!res.ok) {
         throw new Error("Failed to modify user role");
       }
+
       alert("User role updated successfully!");
+
+      // Update the local state to reflect the new role
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.id === userId ? { ...user, role: newRole } : user
+          user.id === userId ? { ...user, role } : user
         )
       );
     } catch (err) {

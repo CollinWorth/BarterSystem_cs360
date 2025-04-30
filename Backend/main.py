@@ -1,10 +1,9 @@
-from fastapi import FastAPI, HTTPException, Body
+from fastapi import FastAPI, HTTPException, Body, Request
 from fastapi.middleware.cors import CORSMiddleware
-from model import User, Haggle, LoginRequest, Item, AddBelongRequest, TradeListing
-from database import  startup, users_collection, listings_collection, database, haggles_collection, item_belongs_collection, items_collection 
-from utils.security import hash_password 
+from model import User, Haggle, LoginRequest, Item, AddBelongRequest, TradeListing, UpdateUserRoleRequest
+from database import startup, users_collection, listings_collection, database, haggles_collection, item_belongs_collection, items_collection
+from utils.security import hash_password, verify_password
 from bson import ObjectId, errors
-from utils.security import verify_password
 from fastapi.responses import JSONResponse
 from fastapi import Query
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -29,8 +28,7 @@ app.add_middleware(
 async def on_startup():
     await startup()  # This will check the MongoDB connection at startup
 
-
-######################################User Routes
+###################################### User Routes ######################################
 
 @app.post("/api/register")
 async def register_user(user: User):
@@ -66,7 +64,51 @@ async def promote_to_admin(email: str):
         raise HTTPException(status_code=404, detail="User not found.")
     return {"message": f"{email} promoted to admin"}
 
-###################Items Routes
+@app.put("/api/users/{user_id}/role")
+async def update_user_role(user_id: str, request: UpdateUserRoleRequest):
+    try:
+        user_object_id = ObjectId(user_id)  # Validate ObjectId
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    # Extract role from the request model
+    role = request.role.lower()
+
+    if role not in ["user", "admin"]:
+        raise HTTPException(status_code=400, detail="Invalid role")
+
+    result = await users_collection.update_one(
+        {"_id": user_object_id}, {"$set": {"role": role}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"message": "User role updated successfully"}
+
+@app.get("/api/users")
+async def get_all_users():
+    try:
+        users = await users_collection.find().to_list(1000)
+        for user in users:
+            user["_id"] = str(user["_id"])  # Convert ObjectId to string
+        return users
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch users: {str(e)}")
+
+@app.delete("/api/users/{user_id}")
+async def delete_user(user_id: str):
+    try:
+        user_object_id = ObjectId(user_id)  # Validate ObjectId
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    result = await users_collection.delete_one({"_id": user_object_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"message": "User deleted successfully"}
+
+################### Items Routes ###################
 
 @app.post("/api/items")
 async def create_item(item: Item):
@@ -111,7 +153,7 @@ async def delete_item(itemBelongsId: str):
 
     return {"message": "Item deleted successfully"}
 
-#####################Inventory Routes
+##################### Inventory Routes #####################
 
 @app.post("/api/add-belong")
 async def add_belong(data: AddBelongRequest):
@@ -130,8 +172,9 @@ async def get_user_inventory(userId: str):
         user_object_id = ObjectId(userId)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid userId format")
+
     # Get all itemBelongs entries for this user
-    belongs_cursor = database.itemBelongs.find({ "userId": user_object_id })
+    belongs_cursor = database.itemBelongs.find({"userId": user_object_id})
     belongs_list = await belongs_cursor.to_list(length=None)
 
     results = []
@@ -141,7 +184,7 @@ async def get_user_inventory(userId: str):
         item_obj_id = ObjectId(item_id) if isinstance(item_id, str) else item_id
 
         # Look up the actual item
-        item_doc = await database.items.find_one({ "_id": item_obj_id })
+        item_doc = await database.items.find_one({"_id": item_obj_id})
         item_name = item_doc["name"] if item_doc else "Unknown Item"
 
         results.append({
@@ -155,48 +198,6 @@ async def get_user_inventory(userId: str):
         })
 
     return results
-
-@app.put("/api/users/{user_id}/role")
-async def update_user_role(user_id: str, role: str = Body(...)):
-    try:
-        user_object_id = ObjectId(user_id)  # Validate ObjectId
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid user ID format")
-
-    if role not in ["user", "admin"]:
-        raise HTTPException(status_code=400, detail="Invalid role")
-
-    result = await users_collection.update_one(
-        {"_id": user_object_id}, {"$set": {"role": role}}
-    )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"message": "User role updated successfully"}
-
-@app.get("/api/users")
-async def get_all_users():
-    try:
-        users = await users_collection.find().to_list(1000)
-        for user in users:
-            user["_id"] = str(user["_id"])  # Convert ObjectId to string
-        return users
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch users: {str(e)}")
-
-@app.delete("/api/users/{user_id}")
-async def delete_user(user_id: str):
-    try:
-        user_object_id = ObjectId(user_id)  # Validate ObjectId
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid user ID format")
-
-    result = await users_collection.delete_one({"_id": user_object_id})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    return {"message": "User deleted successfully"}
-
 
 @app.get("/api/InventoryOptions")
 async def get_inventory_options(userId: str):
@@ -241,8 +242,7 @@ async def get_inventory_options(userId: str):
 
     return results
 
-
-############################Listings Routes
+############################ Listings Routes ############################
 
 @app.post("/api/trade-listing")
 async def create_trade_listing(listing: TradeListing):
@@ -353,10 +353,7 @@ async def get_listings():
     print(f"Fetched {len(currentListings)} listings")
     return currentListings
 
-
-    ################## Haggle Routes ##################
-
-
+################## Haggle Routes ##################
 
 def is_valid_objectid(oid: str) -> bool:
     try:
@@ -452,9 +449,6 @@ async def finalize_trade(
     except Exception as e:
         print(f"Trade finalization failed for haggleId: {haggleId}. Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Trade failed: {str(e)}")
-
-
-
 
 @app.get("/api/current-haggles")
 async def get_current_haggles(userId: str):

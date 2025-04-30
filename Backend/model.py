@@ -67,3 +67,6 @@ class TradeListing(BaseModel):
     requested_item_id: str
     requested_quantity: int
     post_status:str
+
+class UpdateUserRoleRequest(BaseModel):
+    role: str
