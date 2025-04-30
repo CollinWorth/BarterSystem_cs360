@@ -77,7 +77,6 @@ const UserDash = ({ onLogout }) => {
 
         {activeTab === "manageUsers" && (
           <div>
-            <h2>Manage Users</h2>
             <ManageUsersPage /> {/* Render the ManageUsersPage component */}
           </div>
         )}

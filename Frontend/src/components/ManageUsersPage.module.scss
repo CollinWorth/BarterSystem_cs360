@@ -1,15 +1,54 @@
 .manageUsersContainer {
-  padding: 2rem;
+  padding: 20px;
+  font-family: Arial, sans-serif;
   background-color: #1c1c1e; /* Black background */
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Darker shadow for depth */
   color: #f7c518; /* Gold text color */
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 h2 {
   margin-bottom: 1.5rem;
   font-size: 1.8rem;
   color: #f7c518; /* Gold color for headings */
+}
+
+.groupsSection,
+.usersSection {
+  margin-bottom: 40px;
+  border: 1px solid #444;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.groupsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.groupCard {
+  background: #2c2c2e;
+  border: 1px solid #444;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  width: 150px;
+  color: #f7c518;
+}
+
+.groupCard p {
+  margin: 0;
+}
+
+.createGroup {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
 }
 
 .usersTable {
@@ -20,16 +59,14 @@ h2 {
 
 .usersTable th,
 .usersTable td {
-  border: 1px solid #333; /* Subtle border for table cells */
-  padding: 0.75rem;
+  border: 1px solid #444;
+  padding: 10px;
   text-align: left;
-  color: #f7c518; /* Gold text color */
+  color: #f7c518;
 }
 
 .usersTable th {
-  background-color: #333; /* Dark gray for table headers */
-  color: #f7c518; /* Gold text color */
-  font-weight: bold;
+  background: #f4f4f4;
 }
 
 .usersTable tr:nth-child(even) {
@@ -40,19 +77,30 @@ h2 {
   background-color: #444; /* Darker gray for hover effect */
 }
 
-.deleteButton {
-  background-color: #f7c518; /* Gold button */
-  color: #000; /* Black text for contrast */
+.actionButton {
+  background: #1d1d1d;
+  color: white;
   border: none;
+  padding: 5px 10px;
   border-radius: 4px;
-  padding: 0.5rem 1rem;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.actionButton:hover {
+  background: #b38f00;
+}
+
+.deleteButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .deleteButton:hover {
-  background-color: #ddb10f; /* Slightly darker gold for hover */
-  transform: scale(1.05); /* Slight scaling effect */
+  background: #a71d2a;
 }
 
 .roleDropdown {

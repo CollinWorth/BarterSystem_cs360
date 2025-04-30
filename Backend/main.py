@@ -7,6 +7,7 @@ from bson import ObjectId, errors
 from fastapi.responses import JSONResponse
 from fastapi import Query
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel
 
 origins = [
     "http://localhost:3000",  # Allow React app on localhost:3000
@@ -206,23 +207,28 @@ async def get_inventory_options(userId: str):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid userId format")
 
-    # Try to find a group that includes the user
-    group = await database.groups.find_one({"members": user_object_id})
+    # Step 1: Fetch all items directly associated with the user
+    user_items_cursor = database.itemBelongs.find({"userId": user_object_id})
+    user_items = await user_items_cursor.to_list(length=None)
 
-    # Determine which userIds to search for
-    if group:
-        user_ids_to_check = group["members"]
-    else:
-        user_ids_to_check = [user_object_id]
+    # Step 2: Find the group(s) the user belongs to
+    group_memberships = await database.groupMembers.find({"userId": user_object_id}).to_list(length=None)
+    group_ids = [membership["groupId"] for membership in group_memberships]
 
-    # Find itemBelongs for the user or group members
-    item_belongs_cursor = database.itemBelongs.find({
-        "userId": {"$in": user_ids_to_check}
-    })
-    item_belongs = await item_belongs_cursor.to_list(length=None)
+    # Step 3: Find all users in the same groups
+    group_members = await database.groupMembers.find({"groupId": {"$in": group_ids}}).to_list(length=None)
+    user_ids_in_groups = [member["userId"] for member in group_members]
 
+    # Step 4: Fetch all items associated with users in the same groups
+    group_items_cursor = database.itemBelongs.find({"userId": {"$in": user_ids_in_groups}})
+    group_items = await group_items_cursor.to_list(length=None)
+
+    # Combine user items and group items
+    all_items = user_items + group_items
+
+    # Step 5: Enrich the items with details from the `items` collection
     results = []
-    for item in item_belongs:
+    for item in all_items:
         item_id = item["itemId"]
         item_obj_id = ObjectId(item_id) if isinstance(item_id, str) else item_id
 
@@ -354,6 +360,12 @@ async def get_listings():
     return currentListings
 
 ################## Haggle Routes ##################
+
+def validate_object_id(id: str, field_name: str):
+    try:
+        return ObjectId(id)
+    except Exception:
+        raise HTTPException(status_code=400, detail=f"Invalid {field_name} format")
 
 def is_valid_objectid(oid: str) -> bool:
     try:
@@ -585,3 +597,105 @@ async def get_all_haggles():
 
 
  ####################### End of Haggle Routes ##################
+
+class CreateGroupRequest(BaseModel):
+    name: str
+
+class AddUserToGroupRequest(BaseModel):
+    userId: str
+
+@app.post("/api/groups")
+async def create_group(request: CreateGroupRequest):
+    try:
+        # Check if the group name already exists
+        existing_group = await database.groups.find_one({"name": request.name})
+        if existing_group:
+            raise HTTPException(status_code=400, detail="Group name already exists")
+
+        result = await database.groups.insert_one({"name": request.name})
+        return {"message": "Group created successfully", "groupId": str(result.inserted_id)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create group: {str(e)}")
+
+@app.get("/api/groups")
+async def get_all_groups():
+    try:
+        groups = await database.groups.find().to_list(length=None)
+        for group in groups:
+            group["_id"] = str(group["_id"])  # Convert ObjectId to string
+        return groups
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch groups: {str(e)}")
+
+@app.post("/api/groups/{groupId}/add-user")
+async def add_user_to_group(groupId: str, request: AddUserToGroupRequest):
+    try:
+        group_object_id = validate_object_id(groupId, "groupId")
+        user_object_id = validate_object_id(request.userId, "userId")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid groupId or userId format")
+
+    # Check if the group exists
+    group = await database.groups.find_one({"_id": group_object_id})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    # Check if the user exists
+    user = await database.users.find_one({"_id": user_object_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Check if the user is already in the group
+    existing = await database.groupMembers.find_one({"groupId": group_object_id, "userId": user_object_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="User is already in the group")
+
+    result = await database.groupMembers.insert_one({"groupId": group_object_id, "userId": user_object_id})
+    return {"message": "User added to group successfully", "id": str(result.inserted_id)}
+
+@app.delete("/api/groups/{groupId}/remove-user/{userId}")
+async def remove_user_from_group(groupId: str, userId: str):
+    try:
+        group_object_id = validate_object_id(groupId, "groupId")
+        user_object_id = validate_object_id(userId, "userId")
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid groupId or userId format")
+
+    # Check if the group exists
+    group = await database.groups.find_one({"_id": group_object_id})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    # Check if the user exists
+    user = await database.users.find_one({"_id": user_object_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Attempt to remove the user from the group
+    result = await database.groupMembers.delete_one({"groupId": group_object_id, "userId": user_object_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found in the group")
+
+    return {"message": "User removed from group successfully"}
+
+@app.get("/api/groups/{groupId}/users")
+async def get_users_in_group(groupId: str):
+    try:
+        group_object_id = ObjectId(groupId)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid groupId format")
+
+    # Check if the group exists
+    group = await database.groups.find_one({"_id": group_object_id})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    # Fetch users in the group
+    group_members = await database.groupMembers.find({"groupId": group_object_id}).to_list(length=None)
+    user_ids = [member["userId"] for member in group_members]
+
+    users = await database.users.find({"_id": {"$in": user_ids}}).to_list(length=None)
+    for user in users:
+        user["_id"] = str(user["_id"])  # Convert ObjectId to string
+
+    return users
