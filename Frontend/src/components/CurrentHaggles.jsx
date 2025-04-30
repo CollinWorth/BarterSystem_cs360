@@ -157,8 +157,8 @@ const CurrentHaggles = ({ userId }) => {
                   </div>
                   {h.status === "pending" && (
                     <div className={styles.buttonGroup}>
-                      <button onClick={() => handleApprove(h.id)} className={styles.approve}>Approve</button>
-                      <button onClick={() => handleReject(h.id)} className={styles.reject}>Reject</button>
+                      <button onClick={() => handleApprove(h.id)} className={styles.haggleStatus}>Approve</button>
+                      <button onClick={() => handleReject(h.id)} className={styles.haggleStatus}>Reject</button>
                     </div>
                   )}
                 </li>
