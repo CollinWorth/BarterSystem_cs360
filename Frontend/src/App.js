@@ -56,9 +56,32 @@ const App = () => {
         {/* Home Page Content */}
         {currentPage === "home" && (
           <div className="home-content">
-            <h1 class="bounce">Welcome to Haggle Hub! </h1>
-            <p>The marketplace where <strong>buyers and sellers</strong> negotiate the best deals! List your items, make offers, and haggle your way to the perfect price.</p>
-            <p>Start exploring now!</p>
+            <h1 className="bounce">Welcome to HaggleHub!</h1>
+            <p>
+              The marketplace where <strong>buyers and sellers</strong> negotiate the best deals! List your items, make offers, and haggle your way to the perfect price.
+            </p>
+            <p>
+              <strong>What is HaggleHub?</strong> HaggleHub is a dynamic platform designed to bring buyers and sellers together in a fun and interactive way. Unlike traditional marketplaces, HaggleHub encourages negotiation and creativity in every transaction.
+            </p>
+            <p>
+              <strong>How does it work?</strong> It's simple:
+              <ul>
+                <li>📦 <strong>List Your Items:</strong> Post items you want to sell or trade.</li>
+                <li>💬 <strong>Make Offers:</strong> Browse listings and make offers on items you like.</li>
+                <li>🤝 <strong>Haggle:</strong> Negotiate with other users to reach the perfect deal.</li>
+              </ul>
+            </p>
+            <p>
+              Whether you're looking to buy, sell, or trade, HaggleHub is the place to make it happen. Start exploring now and join the community of savvy hagglers!
+            </p>
+            <div className="home-buttons">
+              <button className="signup-button" onClick={() => handlePageChange("signup")}>
+                Sign Up
+              </button>
+              <button className="login-button" onClick={() => handlePageChange("login")}>
+                Login
+              </button>
+            </div>
           </div>
         )}
       </div>

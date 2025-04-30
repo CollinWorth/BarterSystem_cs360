@@ -143,3 +143,78 @@ button{
 .bounce {
   animation: bounce 2s infinite;
 }
+
+/* Home Content */
+.home-content {
+  text-align: center;
+  padding: 20px;
+  color: #f7c518; /* Gold color */
+  background-color: #1c1c1e; /* Black background */
+  border-radius: 8px;
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+.home-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.home-content p {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.home-content ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 15px 0;
+}
+
+.home-content ul li {
+  font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+.explore-button {
+  background-color: #f7c518; /* Gold */
+  color: #1c1c1e; /* Black */
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.explore-button:hover {
+  background-color: #d4a017; /* Darker gold */
+}
+
+/* Home Buttons */
+.home-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.signup-button,
+.login-button {
+  background-color: #f7c518; /* Gold */
+  color: #1c1c1e; /* Black */
+  border: none;
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.signup-button:hover,
+.login-button:hover {
+  background-color: #d4a017; /* Darker gold */
+}
