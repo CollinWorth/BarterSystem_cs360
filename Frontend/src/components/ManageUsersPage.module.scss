@@ -1,0 +1,82 @@
+.manageUsersContainer {
+  padding: 2rem;
+  background-color: #1c1c1e; /* Black background */
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Darker shadow for depth */
+  color: #f7c518; /* Gold text color */
+}
+
+h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  color: #f7c518; /* Gold color for headings */
+}
+
+.usersTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.usersTable th,
+.usersTable td {
+  border: 1px solid #333; /* Subtle border for table cells */
+  padding: 0.75rem;
+  text-align: left;
+  color: #f7c518; /* Gold text color */
+}
+
+.usersTable th {
+  background-color: #333; /* Dark gray for table headers */
+  color: #f7c518; /* Gold text color */
+  font-weight: bold;
+}
+
+.usersTable tr:nth-child(even) {
+  background-color: #2c2c2e; /* Slightly lighter black for alternating rows */
+}
+
+.usersTable tr:hover {
+  background-color: #444; /* Darker gray for hover effect */
+}
+
+.deleteButton {
+  background-color: #f7c518; /* Gold button */
+  color: #000; /* Black text for contrast */
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.deleteButton:hover {
+  background-color: #ddb10f; /* Slightly darker gold for hover */
+  transform: scale(1.05); /* Slight scaling effect */
+}
+
+.roleDropdown {
+  background-color: #2c2c2e; /* Dark background for dropdown */
+  color: #f7c518; /* Gold text */
+  border: 1px solid #444; /* Subtle border */
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.modifyButton {
+  background-color: #4caf50; /* Green button */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-right: 0.5rem;
+}
+
+.modifyButton:hover {
+  background-color: #45a049; /* Darker green on hover */
+  transform: scale(1.05); /* Slight scaling effect */
+}
