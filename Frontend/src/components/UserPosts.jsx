@@ -40,9 +40,6 @@ const UserPosts = ({ userId }) => {
               <p><strong>Offering:</strong> {listing.offered_quantity} of item {listing.offered_item_name}</p>
               <p><strong>Wants:</strong> {listing.requested_quantity} of item {listing.requested_item_name}</p>
               <p><strong>Status:</strong> {statusLabels[listing.post_status] || listing.post_status}</p> 
-              <div>{listing?.post_status === "pendingoffer" && (
-                <><button>Confirm</button><button>Deny</button></>)}
-                </div>
             </div>
           ))}
         </div>
