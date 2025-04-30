@@ -9,6 +9,8 @@ import AddUserPost from "../components/AddUserPost";
 import UserPosts from "../components/UserPosts";
 import CurrentHaggles from "../components/CurrentHaggles";
 import ManageUsersPage from "../components/ManageUsersPage"; // Import the ManageUsersPage component
+import AllHagglesTable from "../components/AllHagglesTable";
+
 
 const UserDash = ({ onLogout }) => {
   const { user, logout } = useAuth();
@@ -62,6 +64,7 @@ const UserDash = ({ onLogout }) => {
             >
               Go to Manage Users
             </button>
+            <AllHagglesTable />
           </div>
         )}
 

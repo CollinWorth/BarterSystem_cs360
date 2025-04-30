@@ -1,0 +1,40 @@
+.statusCell {
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-weight: bold;
+    text-transform: capitalize;
+    display: inline-block;
+  }
+  
+  .pending {
+    background-color: #ffcc00;
+    color: #000;
+  }
+  
+  .approved {
+    background-color: #00cc66;
+    color: #fff;
+  }
+  
+  .haggleTable td,
+.haggleTable th {
+  text-align: center;
+}
+
+.haggleTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .haggleTable th,
+  .haggleTable td {
+    padding: 0.75rem 1.5rem; // 🔹 adds horizontal spacing
+    border: 1px solid #444; // 🔹 adds visible borders
+    text-align: center;
+  }
+  
+  .haggleTable thead {
+    background-color: #222;
+    color: #ffcc00;
+  }

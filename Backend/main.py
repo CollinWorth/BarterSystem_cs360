@@ -529,4 +529,59 @@ async def delete_haggle(haggleId: str):
         raise HTTPException(status_code=404, detail="Haggle not found")
 
     return {"message": "Haggle deleted successfully"}
+
+
+def is_valid_objectid(oid: str) -> bool:
+    try:
+        return ObjectId.is_valid(oid)
+    except Exception:
+        return False
+
+@app.get("/api/all-haggles")
+async def get_all_haggles():
+    cursor = database["haggles"].find()
+    haggles = await cursor.to_list(length=None)
+
+    enriched = []
+
+    for haggle in haggles:
+        sender_item_name = "Unknown"
+        recipient_item_name = "Unknown"
+        sender_relative_value = None
+        recipient_relative_value = None
+
+        sender_item_id = haggle.get("senderItemId", "")
+        recipient_item_id = haggle.get("recipientItemId", "")
+
+        if is_valid_objectid(sender_item_id):
+            sender_item = await database["items"].find_one({"_id": ObjectId(sender_item_id)})
+            if sender_item:
+                sender_item_name = sender_item.get("name", "Unknown")
+                sender_relative_value = sender_item.get("relative_value")
+
+        if is_valid_objectid(recipient_item_id):
+            recipient_item = await database["items"].find_one({"_id": ObjectId(recipient_item_id)})
+            if recipient_item:
+                recipient_item_name = recipient_item.get("name", "Unknown")
+                recipient_relative_value = recipient_item.get("relative_value")
+
+        # Convert ALL ObjectIds to strings before returning
+        enriched.append({
+            "id": str(haggle.get("_id", "")),
+            "senderId": str(haggle.get("senderId", "")),
+            "recipientId": str(haggle.get("recipientId", "")),
+            "senderItemId": str(sender_item_id),
+            "senderItemName": sender_item_name,
+            "senderItemQuantity": haggle.get("senderItemQuantity", 0),
+            "senderItemRelativeValue": sender_relative_value,
+            "recipientItemId": str(recipient_item_id),
+            "recipientItemName": recipient_item_name,
+            "recipientItemQuantity": haggle.get("recipientItemQuantity", 0),
+            "recipientItemRelativeValue": recipient_relative_value,
+            "status": haggle.get("status", "pending")
+        })
+
+    return enriched
+
+
  ####################### End of Haggle Routes ##################
