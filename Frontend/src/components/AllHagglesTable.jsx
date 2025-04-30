@@ -51,7 +51,7 @@ const AllHagglesTable = () => {
       <table className={styles.haggleTable}>
         <thead>
           <tr>
-            <th onClick={() => sortData("id")}>Haggle ID{renderSortIndicator("id")}</th>
+            <th onClick={() => sortData("id")}>Transaction ID{renderSortIndicator("id")}</th>
             <th onClick={() => sortData("senderId")}>Sender ID{renderSortIndicator("senderId")}</th>
             <th onClick={() => sortData("senderItemName")}>Sender Item{renderSortIndicator("senderItemName")}</th>
             <th onClick={() => sortData("recipientId")}>Recipient ID{renderSortIndicator("recipientId")}</th>
