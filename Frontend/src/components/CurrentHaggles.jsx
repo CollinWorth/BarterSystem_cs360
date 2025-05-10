@@ -25,23 +25,16 @@ const CurrentHaggles = ({ userId }) => {
 
   const handleApprove = async (haggleId) => {
     console.log("Approving haggle with ID:", haggleId); // Debugging log
-    try {
+   
       const res = await fetch("http://localhost:8000/api/finalize-trade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ haggleId: String(haggleId) }),
-      });
+        body: JSON.stringify({ haggleId: haggleId.toString() }),
+        });
   
-      if (res.ok) {
+   
         fetchHaggles();
-      } else {
-        const error = await res.json();
-        console.error("Failed to approve haggle:", error.detail);
-        alert("Quantity of product no longer available.");
-      }
-    } catch (err) {
-      console.error("Error approving haggle:", err);
-    }
+     
   };
 
   const handleReject = async (haggleId) => {
